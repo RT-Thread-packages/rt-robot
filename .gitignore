@@ -50,4 +50,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+<<<<<<< HEAD
 
+=======
+.vscode/
+>>>>>>> add-structure
