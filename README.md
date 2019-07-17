@@ -34,8 +34,8 @@ rt-robot
 │      chassis.c            // 小车底盘组件
 │      chassis.h
 │
-├─kinematics                // 小车动力学模型组件
-│      kinematics.c
+├─kinematics
+│      kinematics.c         // 小车动力学模型组件
 │      kinematics.h
 │
 ├─wheel
