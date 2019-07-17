@@ -3,7 +3,7 @@ Change From YFRobot. www.yfrobot.com
 **********************************************************/
 
 #include <rtthread.h>
-#include <drv_gpio.h>
+#include <rtdevice.h>
 #include "ps2_controller.h"
 #include "ps2_controller_port.h"
 
@@ -27,6 +27,7 @@ int ps2_scan(ps2_ctrl_data_t *pt)
     pt->left_stick_x = temp_recv[5];
     pt->left_stick_y = temp_recv[6];
 
+    // 确认已连接接收器
     if (temp_recv[0] == 0x5A)
     {
         return 1;

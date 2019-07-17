@@ -4,6 +4,6 @@ cwd   = GetCurrentDir()
 src	  = Glob('*.c')
 PATH  = [cwd]
 
-group = DefineGroup('robots', src, depend = [], CPPPATH = PATH)
+group = DefineGroup('robots', src, depend = ['PKG_USING_ROBOTS'], CPPPATH = PATH)
 
 Return('group')

@@ -1,6 +1,5 @@
 #include <rtthread.h>
 #include <rtdevice.h>
-#include <drv_gpio.h>
 #include "ps2_controller_port.h"
 
 
@@ -21,8 +20,11 @@
 
 static void _delay_us(uint16_t us)
 {
+    // TODO
+
     for (int i = 0; i < us; i++)
     {
+        // maybe the cyclic value needs to be modified
         for (int j = 0; j < 0x1F;)
             j++;
     }
