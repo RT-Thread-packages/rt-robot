@@ -32,7 +32,7 @@ struct ps2_ctrl_data
 };
 
 void ps2_init(void);
-int ps2_scan(ps2_ctrl_data_t *pt);
+int  ps2_scan(ps2_ctrl_data_t *pt);
 void ps2_vibrating(uint8_t s_motor, uint8_t l_motor);
 void ps2_enter_config(void);
 void ps2_open_vibration_mode(void);
