@@ -13,7 +13,7 @@
 
 下面是两轮差分控制的小车初始化示例代码：
 
-```
+```C
 // 1. Initialize two wheels - left and right
 wheel_t* c_wheels = (wheel_t*) rt_malloc(sizeof(wheel_t) * 2);
 if (c_wheels == RT_NULL)
