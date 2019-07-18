@@ -6,12 +6,51 @@ Change From YFRobot. www.yfrobot.com
 #include <rtdevice.h>
 #include "ps2_controller.h"
 #include "ps2_controller_port.h"
+#include "controller.h"
 
 extern hal_ps2_port_t hal_ps2_port;
 
 void ps2_init(void)
 {
     hal_ps2_port.init(0);
+}
+
+rt_err_t ps2_send_command(controller_t controller, ps2_ctrl_data_t *ctrl_data)
+{
+    rt_int8_t analog;
+
+    analog = +(100 * (ctrl_data->left_stick_x - 0x80) / 127);
+    controller_parse_command(controller, PS2_STICK_LX, &analog);
+    analog = -(100 * (ctrl_data->left_stick_y - 0x7F) / 127);
+    controller_parse_command(controller, PS2_STICK_LY, &analog);
+    analog = -(100 * (ctrl_data->right_stick_x - 0x80) / 127);
+    controller_parse_command(controller, PS2_STICK_RX, &analog);
+    analog = +(100 * (ctrl_data->right_stick_y - 0x7F) / 127);
+    controller_parse_command(controller, PS2_STICK_RY, &analog);
+
+    if (!(ctrl_data->button & PS2_BTN_SELECT))
+    {
+        controller_parse_command(controller, PS2_BTN_SELECT, RT_NULL);
+    }
+
+    if (!(ctrl_data->button & PS2_BTN_UP))
+    {
+        controller_parse_command(controller, PS2_BTN_UP, RT_NULL);
+    }
+    if (!(ctrl_data->button & PS2_BTN_DOWN))
+    {
+        controller_parse_command(controller, PS2_BTN_DOWN, RT_NULL);
+    }
+    if (!(ctrl_data->button & PS2_BTN_LEFT))
+    {
+        controller_parse_command(controller, PS2_BTN_LEFT, RT_NULL);
+    }
+    if (!(ctrl_data->button & PS2_BTN_RIGHT))
+    {
+        controller_parse_command(controller, PS2_BTN_RIGHT, RT_NULL);
+    }
+
+    return RT_EOK;
 }
 
 int ps2_scan(ps2_ctrl_data_t *pt)
@@ -32,6 +71,8 @@ int ps2_scan(ps2_ctrl_data_t *pt)
     {
         return 1;
     }
+
+    // rt_kprintf("0x%x %d %d \r\n", pt->button, pt->left_stick_x, pt->left_stick_y);
 
     return 0;
 }

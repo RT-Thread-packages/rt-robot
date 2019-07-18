@@ -1,11 +1,5 @@
 #include <rtthread.h>
-
-// command
-#define CONTROLLER_CMD_REMIND    1
-
-// digital bit
-#define CONTROLLER_BITMASK_START        (1 << 0)
-#define CONTROLLER_BITMASK_STOP         (1 << 1)
+#include <chassis.h>
 
 typedef struct controller *controller_t;
 
@@ -14,24 +8,24 @@ enum controller_type
     PS2,
 };
 
-struct controller_analog
+struct controller_table
 {
-    int8_t x;       // -100 ~ 100 <> percentage
-    int8_t y;
-    int8_t z;
+    rt_int8_t remote;
+    rt_int8_t chassis;
 };
 
 struct controller
 {
-    enum controller_type type;
-    struct controller_analog analog;
-    uint32_t digital;
+    enum controller_type    type;
+    chassis_t               chassis;
+    rt_int8_t               table_size;
+    rt_int8_t               table_max;
+    struct controller_table *table;
 };
 
-controller_t    controller_create(enum controller_type type);
+controller_t    controller_create(chassis_t chas, enum controller_type type);
 void            controller_destroy(controller_t controller);
 rt_err_t        controller_enable(controller_t controller);
 rt_err_t        controller_disable(controller_t controller);
-rt_err_t        controller_get(controller_t controller);
-rt_err_t        controller_set(controller_t controller, int cmd, void *arg);
-
+rt_err_t        controller_bind_command(controller_t controller, rt_int8_t cmd, rt_int8_t chas_cmd);
+rt_err_t        controller_parse_command(controller_t controller, rt_int8_t cmd, void *args);

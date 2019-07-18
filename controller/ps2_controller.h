@@ -3,22 +3,22 @@
 
 #include <stdint.h>
 
-#define PS2_BUTTON_SELECT       (1 << 0)
-#define PS2_BUTTON_L3           (1 << 1)
-#define PS2_BUTTON_R3           (1 << 2)
-#define PS2_BUTTON_START        (1 << 3)
-#define PS2_BUTTON_UP           (1 << 4)
-#define PS2_BUTTON_RIGHT        (1 << 5)
-#define PS2_BUTTON_DOWN         (1 << 6)
-#define PS2_BUTTON_LEFT         (1 << 7)
-#define PS2_BUTTON_L2           (1 << 8)
-#define PS2_BUTTON_R2           (1 << 9)
-#define PS2_BUTTON_L1           (1 << 10)
-#define PS2_BUTTON_R1           (1 << 11)
-#define PS2_BUTTON_TRIANGLE     (1 << 12)
-#define PS2_BUTTON_CICLE        (1 << 13)
-#define PS2_BUTTON_FORK         (1 << 14)
-#define PS2_BUTTON_SQUARE       (1 << 15)
+#define PS2_BUTTON_SELECT       0
+#define PS2_BUTTON_L3           1
+#define PS2_BUTTON_R3           2
+#define PS2_BUTTON_START        3
+#define PS2_BUTTON_UP           4
+#define PS2_BUTTON_RIGHT        5
+#define PS2_BUTTON_DOWN         6
+#define PS2_BUTTON_LEFT         7
+#define PS2_BUTTON_L2           8
+#define PS2_BUTTON_R2           9
+#define PS2_BUTTON_L1           10
+#define PS2_BUTTON_R1           11
+#define PS2_BUTTON_TRIANGLE     12
+#define PS2_BUTTON_CICLE        13
+#define PS2_BUTTON_FORK         14
+#define PS2_BUTTON_SQUARE       15
 
 typedef struct ps2_ctrl_data ps2_ctrl_data_t;
 

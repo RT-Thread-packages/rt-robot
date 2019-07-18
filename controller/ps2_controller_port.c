@@ -1,20 +1,20 @@
 #include <rtthread.h>
 #include <rtdevice.h>
+#include "drv_gpio.h"
 #include "ps2_controller_port.h"
 
+#define HAL_CS_PIN      GET_PIN(B, 12)
+#define HAL_CLK_PIN     GET_PIN(B, 13)
+#define HAL_DO_PIN      GET_PIN(B, 15)
+#define HAL_DI_PIN      GET_PIN(B, 14)
 
-#define HAL_CS_PIN      51 // GET_PIN(B, 12)
-#define HAL_CLK_PIN     52 // GET_PIN(B, 13)
-#define HAL_DO_PIN      54 // GET_PIN(B, 15)
-#define HAL_DI_PIN      53 // GET_PIN(B, 14)
-
-#define HAL_CS_H() rt_pin_write(HAL_CS_PIN, PIN_HIGH)
-#define HAL_CS_L() rt_pin_write(HAL_CS_PIN, PIN_LOW)
-#define HAL_CLK_H() rt_pin_write(HAL_CLK_PIN, PIN_HIGH)
-#define HAL_CLK_L() rt_pin_write(HAL_CLK_PIN, PIN_LOW)
-#define HAL_DO_H() rt_pin_write(HAL_DO_PIN, PIN_HIGH)
-#define HAL_DO_L() rt_pin_write(HAL_DO_PIN, PIN_LOW)
-#define HAL_GET_DI() rt_pin_read(HAL_DI_PIN)
+#define HAL_CS_H()      rt_pin_write(HAL_CS_PIN, PIN_HIGH)
+#define HAL_CS_L()      rt_pin_write(HAL_CS_PIN, PIN_LOW)
+#define HAL_CLK_H()     rt_pin_write(HAL_CLK_PIN, PIN_HIGH)
+#define HAL_CLK_L()     rt_pin_write(HAL_CLK_PIN, PIN_LOW)
+#define HAL_DO_H()      rt_pin_write(HAL_DO_PIN, PIN_HIGH)
+#define HAL_DO_L()      rt_pin_write(HAL_DO_PIN, PIN_LOW)
+#define HAL_GET_DI()    rt_pin_read(HAL_DI_PIN)
 
 #define KEEP_TIME() _delay_us(5);
 
@@ -107,7 +107,7 @@ static int init(void *vp)
 
     HAL_CS_H();
     HAL_CLK_H();
-    
+
     return 0;
 }
 
