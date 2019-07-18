@@ -3,29 +3,30 @@
 
 typedef struct controller *controller_t;
 
-enum controller_type 
-{
-    PS2,
-};
-
-struct controller_table
-{
-    rt_int8_t remote;
-    rt_int8_t chassis;
-};
+// enum controller_type 
+// {
+//     PS2 = 0,
+//     BLE,
+//     TCP
+// };
 
 struct controller
 {
-    enum controller_type    type;
-    chassis_t               chassis;
-    rt_int8_t               table_size;
-    rt_int8_t               table_max;
-    struct controller_table *table;
+    // enum    controller_type    type;
+
+    rt_mailbox_t mb;
+    rt_thread_t tid_controller;
+
+    int     (*init)(void);
+    int     (*enable)(void);
+    int     (*disable)(void);
+
+    int     (*contrl_cmd_handler)(rt_int8_t cmd);
+
 };
 
-controller_t    controller_create(chassis_t chas, enum controller_type type);
-void            controller_destroy(controller_t controller);
-rt_err_t        controller_enable(controller_t controller);
-rt_err_t        controller_disable(controller_t controller);
-rt_err_t        controller_bind_command(controller_t controller, rt_int8_t cmd, rt_int8_t chas_cmd);
-rt_err_t        controller_parse_command(controller_t controller, rt_int8_t cmd, void *args);
+controller_t controller_create(void);
+void controller_destroy(controller_t contrl);
+
+void controller_enable(void);
+void controller_disable(void);
