@@ -1,150 +1,137 @@
-#include <rtthread.h>
-#include <rtdevice.h>
+
+#include "dc_motor.h"
 
 #define DBG_SECTION_NAME  "dc_motor"
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-#define PWM_PERIOD 50000
-
-// MOTOR
-#define LEFT_FORWARD_PWM            "pwm4"
-#define LEFT_FORWARD_PWM_CHANNEL    3
-#define LEFT_BACKWARD_PWM           "pwm4"
-#define LEFT_BACKWARD_PWM_CHANNEL   4
-
-#define RIGHT_FORWARD_PWM           "pwm2"
-#define RIGHT_FORWARD_PWM_CHANNEL   3
-#define RIGHT_BACKWARD_PWM          "pwm2"
-#define RIGHT_BACKWARD_PWM_CHANNEL  4
-
-static struct rt_device_pwm *left_forward_pwmdev;
-static struct rt_device_pwm *left_backward_pwmdev;
-static struct rt_device_pwm *right_forward_pwmdev;
-static struct rt_device_pwm *right_backward_pwmdev;
-
-int left_motor_init(void)
+#ifdef	ONE_PWM_DUAL_PIN
+	struct dc_motor_cfg{
+		char* pwm_name;
+		rt_uint8_t channel;
+		int pina_index;
+		int pinb_index;
+		struct rt_device_pwm * pwmdev;
+	};
+#endif	/* ONE_PWM_DUAL_PIN*/
+	
+#ifdef	DUAL_PWM
+	struct dc_motor_cfg{
+		char* pwm_a;
+		rt_uint8_t channel_a;
+		char* pwm_b;
+		rt_uint8_t channel_b;
+		struct rt_device_pwm * pwm_a_dev;
+		struct rt_device_pwm * pwm_b_dev;
+	};
+#endif	/* DUAL_PWM*/
+static struct dc_motor_cfg dc_motor_cfg_obj[] =
 {
-    left_forward_pwmdev   = (struct rt_device_pwm *)rt_device_find(LEFT_FORWARD_PWM);
-    left_backward_pwmdev  = (struct rt_device_pwm *)rt_device_find(LEFT_BACKWARD_PWM);
+	#if 	DC_MOTOR_NUMBER > 0
+		DC_MOTOR_PWM_CFG1,
+	#endif
+	#if 	DC_MOTOR_NUMBER > 1
+		DC_MOTOR_PWM_CFG2,
+	#endif
+	#if 	DC_MOTOR_NUMBER > 2
+		DC_MOTOR_PWM_CFG3,
+	#endif
+	#if 	DC_MOTOR_NUMBER > 3
+		DC_MOTOR_PWM_CFG4,
+	#endif
+};
 
-    if (left_forward_pwmdev == RT_NULL)
-    {
-        LOG_E("Can't find PWM device %s for dc forward motor!", LEFT_FORWARD_PWM);
-        return RT_NULL;
-    }
-    if (left_backward_pwmdev == RT_NULL)
-    {
-        LOG_E("Can't find PWM device %s for dc forward motor!", LEFT_BACKWARD_PWM);
-        return RT_NULL;
-    }
 
-	rt_pwm_set(left_forward_pwmdev, LEFT_FORWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-    rt_pwm_set(left_backward_pwmdev, LEFT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-    
+int dc_motor_creat(int motor_index)
+{
+#ifdef ONE_PWM_DUAL_PIN
+	dc_motor_cfg_obj[motor_index].pwmdev   = (struct rt_device_pwm *)rt_device_find(dc_motor_cfg_obj[motor_index].pwm_name);
+	if (dc_motor_cfg_obj[motor_index].pwmdev == RT_NULL)
+	{
+		LOG_E("Can't find PWM device %s for dc forward motor!", dc_motor_cfg_obj[motor_index].pwmdev);
+		return RT_NULL;
+	}
+	rt_pwm_set(dc_motor_cfg_obj[motor_index].pwmdev, dc_motor_cfg_obj[motor_index].channel, PWM_PERIOD, 0);
+	rt_pin_mode(dc_motor_cfg_obj[motor_index].pina_index,PIN_MODE_OUTPUT);
+	rt_pin_mode(dc_motor_cfg_obj[motor_index].pinb_index,PIN_MODE_OUTPUT);
+	
+#endif
+#ifdef DUAL_PWM
+	dc_motor_cfg_obj[motor_index].pwm_a_dev   = (struct rt_device_pwm *)rt_device_find(dc_motor_cfg_obj[motor_index].pwm_a);
+	dc_motor_cfg_obj[motor_index].pwm_b_dev   = (struct rt_device_pwm *)rt_device_find(dc_motor_cfg_obj[motor_index].pwm_b);
+	if (dc_motor_cfg_obj[motor_index].pwm_a_dev == RT_NULL)
+	{
+		LOG_E("Can't find PWM device %s for dc forward motor!", dc_motor_cfg_obj[motor_index].pwm_a_dev);
+		return RT_NULL;
+	}
+	if (dc_motor_cfg_obj[motor_index].pwm_b_dev == RT_NULL)
+	{
+		LOG_E("Can't find PWM device %s for dc forward motor!", dc_motor_cfg_obj[motor_index].pwm_b_dev);
+		return RT_NULL;
+	}
+	rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_a_dev, dc_motor_cfg_obj[motor_index].channel_a, PWM_PERIOD, 0);
+	rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_b_dev, dc_motor_cfg_obj[motor_index].channel_b, PWM_PERIOD, 0);
+#endif
+	
 	return RT_EOK;
 }
 
-int left_motor_enable(void)
+int dc_motor_enable(int motor_index)
 {
     // Enable PWM
     LOG_D("Enabling motor");
-
-    rt_pwm_enable(left_backward_pwmdev, LEFT_BACKWARD_PWM_CHANNEL);
-    rt_pwm_enable(left_forward_pwmdev, LEFT_FORWARD_PWM_CHANNEL);
-    
-    return 0;
-}
-
-int left_motor_disable(void)
-{
-     // Disable PWM
-    LOG_D("Disabling motor");
-
-    rt_pwm_disable(left_backward_pwmdev, LEFT_BACKWARD_PWM_CHANNEL);
-    rt_pwm_disable(left_forward_pwmdev, LEFT_FORWARD_PWM_CHANNEL);
-    
-    return 0;
-}
-
-int left_motor_set_speed(rt_int8_t percentage)
-{
-    // Set speed (pwm) to desired value
-    // LOG_D("Set motor speed %d pwm", percentage);
-
-    if(percentage > 0)
-    {
-        rt_pwm_set(left_backward_pwmdev, LEFT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-        rt_pwm_set(left_forward_pwmdev, LEFT_FORWARD_PWM_CHANNEL, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
-    }
-    else
-    {
-        rt_pwm_set(left_forward_pwmdev, LEFT_FORWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-        rt_pwm_set(left_backward_pwmdev, LEFT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
-    }
-    
-    return 0;
-}
-
-int right_motor_init(void)
-{
-	right_forward_pwmdev  = (struct rt_device_pwm *)rt_device_find(RIGHT_FORWARD_PWM);
-    right_backward_pwmdev = (struct rt_device_pwm *)rt_device_find(RIGHT_BACKWARD_PWM);
-	
-    if (right_forward_pwmdev == RT_NULL)
-    {
-        LOG_E("Can't find PWM device %s for dc forward motor!", RIGHT_FORWARD_PWM);
-        return RT_NULL;
-    }
-    if (right_backward_pwmdev == RT_NULL)
-    {
-        LOG_E("Can't find PWM device %s for dc forward motor!", RIGHT_BACKWARD_PWM);
-        return RT_NULL;
-    }
-
-    rt_pwm_set(right_backward_pwmdev, RIGHT_FORWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-    rt_pwm_set(right_backward_pwmdev, RIGHT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-    
+#ifdef ONE_PWM_DUAL_PIN
+	rt_pwm_enable(dc_motor_cfg_obj[motor_index].pwmdev, dc_motor_cfg_obj[motor_index].channel);
+#endif
+#ifdef DUAL_PWM
+    rt_pwm_enable(dc_motor_cfg_obj[motor_index].pwm_a_dev, dc_motor_cfg_obj[motor_index].channel_a);
+    rt_pwm_enable(dc_motor_cfg_obj[motor_index].pwm_b_dev, dc_motor_cfg_obj[motor_index].channel_b);
+#endif
     return RT_EOK;
 }
 
-int right_motor_enable(void)
+int dc_motor_disable(int motor_index)
 {
-    // Enable PWM
-    LOG_D("Enabling motor");
-
-    rt_pwm_enable(right_backward_pwmdev, RIGHT_BACKWARD_PWM_CHANNEL);
-    rt_pwm_enable(right_forward_pwmdev, RIGHT_FORWARD_PWM_CHANNEL);
-    
-    return 0;
-}
-
-int right_motor_disable(void)
-{
-     // Disable PWM
+	// Disable PWM
     LOG_D("Disabling motor");
-
-    rt_pwm_disable(right_backward_pwmdev, RIGHT_BACKWARD_PWM_CHANNEL);
-    rt_pwm_disable(right_forward_pwmdev, RIGHT_FORWARD_PWM_CHANNEL);
-
-    return 0;
+#ifdef ONE_PWM_DUAL_PIN
+	rt_pwm_disable(dc_motor_cfg_obj[motor_index].pwmdev, dc_motor_cfg_obj[motor_index].channel);	
+#endif
+#ifdef DUAL_PWM
+    rt_pwm_disable(dc_motor_cfg_obj[motor_index].pwm_a_dev, dc_motor_cfg_obj[motor_index].channel_a);
+    rt_pwm_disable(dc_motor_cfg_obj[motor_index].pwm_b_dev, dc_motor_cfg_obj[motor_index].channel_b);
+#endif
+    return RT_EOK;
 }
 
-int right_motor_set_speed(rt_int8_t percentage)
+int dc_motor_set_speed(int motor_index,rt_int8_t percentage)
 {
     // Set speed (pwm) to desired value
     // LOG_D("Set motor speed %d pwm", percentage);
 
     if(percentage > 0)
     {
-        rt_pwm_set(right_backward_pwmdev, RIGHT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-        rt_pwm_set(right_forward_pwmdev, RIGHT_FORWARD_PWM_CHANNEL, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
+	#ifdef ONE_PWM_DUAL_PIN
+		rt_pin_write(dc_motor_cfg_obj[motor_index].pina_index, PIN_HIGH);
+		rt_pin_write(dc_motor_cfg_obj[motor_index].pinb_index, PIN_LOW);
+		rt_pwm_set(dc_motor_cfg_obj[motor_index].pwmdev, dc_motor_cfg_obj[motor_index].channel, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
+	#endif
+	#ifdef DUAL_PWM
+		rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_a_dev, dc_motor_cfg_obj[motor_index].channel_a, PWM_PERIOD, 0);
+        rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_b_dev, dc_motor_cfg_obj[motor_index].channel_b, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
+	#endif
     }
     else
     {
-        rt_pwm_set(right_forward_pwmdev, RIGHT_FORWARD_PWM_CHANNEL, PWM_PERIOD, 0);
-        rt_pwm_set(right_backward_pwmdev, RIGHT_BACKWARD_PWM_CHANNEL, PWM_PERIOD, PWM_PERIOD / 100 * percentage);
+	#ifdef ONE_PWM_DUAL_PIN
+		rt_pin_write(dc_motor_cfg_obj[motor_index].pina_index, PIN_LOW);
+		rt_pin_write(dc_motor_cfg_obj[motor_index].pinb_index, PIN_HIGH);
+		rt_pwm_set(dc_motor_cfg_obj[motor_index].pwmdev, dc_motor_cfg_obj[motor_index].channel, PWM_PERIOD, -PWM_PERIOD / 100 * percentage);
+	#endif
+	#ifdef DUAL_PWM
+		rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_a_dev, dc_motor_cfg_obj[motor_index].channel_a, PWM_PERIOD, -PWM_PERIOD / 100 * percentage);
+        rt_pwm_set(dc_motor_cfg_obj[motor_index].pwm_b_dev, dc_motor_cfg_obj[motor_index].channel_b, PWM_PERIOD, 0);
+	#endif
     }
-    
-    return 0;
+    return RT_EOK;
 }

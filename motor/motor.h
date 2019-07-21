@@ -17,16 +17,18 @@ enum motor_type
 struct motor
 {
     enum    motor_type                  type;
-    int     (*init)(void);
-    int     (*enable)(void);
-    int     (*disable)(void);
-    int     (*set_speed)(rt_int8_t percentage);
+	int 	index;
+    int     (*init)(int index);
+    int     (*enable)(int index);
+    int     (*disable)(int index);
+    int     (*set_speed)(int index,rt_int8_t percentage);
 };
 
-motor_t   motor_create(int (*init)(void),
-                       int (*enable)(void), 
-                       int (*disable)(void),
-                       int (*set_speed)(rt_int8_t percentage),
+motor_t   motor_create(int motor_index,
+					   int (*init)(int index),
+                       int (*enable)(int index), 
+                       int (*disable)(int index),
+                       int (*set_speed)(int index,rt_int8_t percentage),
                        enum motor_type type);
 void      motor_destroy(motor_t mot);
 
