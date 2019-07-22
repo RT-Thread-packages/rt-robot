@@ -13,14 +13,14 @@ motor_t motor_create(int (*init)(void), int (*enable)(void), int (*disable)(void
         LOG_E("Falied to allocate memory for dc motor");
         return RT_NULL;
     }
-    
+
     new_motor->type      = type;
-	new_motor->init      = init;
+    new_motor->init      = init;
     new_motor->enable    = enable;
     new_motor->disable   = disable;
     new_motor->set_speed = set_speed;
 
-	new_motor->init();
+    new_motor->init();
 
     return new_motor;
 }
