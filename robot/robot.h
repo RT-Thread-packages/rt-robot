@@ -1,3 +1,6 @@
+#ifndef __ROBOT_H__
+#define __ROBOT_H__
+
 #include <rtthread.h>
 #include <chassis.h>
 
@@ -14,11 +17,10 @@ struct robot
 {
     enum    robot_type    type;
 
-    // 机器人对外传递信息
-    rt_mailbox_t mb;
-
     int     (*init)(void);
     int     (*enable)(void);
     int     (*disable)(void);
-    int     (*robot_exec_cmd)(rt_int8_t cmd, void *args);
+    int     (*execute)(rt_int8_t cmd, void *args);
 };
+
+#endif
