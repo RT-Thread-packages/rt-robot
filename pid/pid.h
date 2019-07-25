@@ -13,6 +13,7 @@ struct pid_control
 
     float       minimum;
     float       maximum;
+    float       anti_windup_value;
     rt_int16_t  set_point;
     rt_uint16_t sample_time;    // unit:ms
 
@@ -39,7 +40,7 @@ rt_err_t        pid_set_ki(pid_control_t pid, float ki);
 rt_err_t        pid_set_kd(pid_control_t pid, float kd);
 rt_err_t        pid_set_target(pid_control_t pid, rt_int16_t set_point);
 rt_err_t        pid_set_sample_time(pid_control_t pid, rt_uint16_t sample_time);
-
+rt_err_t        pid_set_anti_windup_value(pid_control_t pid, float anti_windup_value);
 float           pid_update(pid_control_t pid, rt_int16_t current_point);
 
 // PID Thread
