@@ -76,7 +76,7 @@ static rt_err_t single_pwm_motor_set_speed(motor_t mot, rt_int16_t thousands)
 }
 
 
-motor_t single_pwm_motor_creat(char *pwm, int channel, rt_base_t pin1, rt_base_t pin2)
+motor_t single_pwm_motor_create(char *pwm, int channel, rt_base_t pin1, rt_base_t pin2)
 {
     single_pwm_motor_t new_motor = (single_pwm_motor_t)motor_create(sizeof(struct single_pwm_motor));
     if (new_motor == RT_NULL)
