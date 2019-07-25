@@ -4,6 +4,18 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
+motor_t motor_create(rt_size_t size)
+{
+    motor_t new_motor = (motor_t)rt_malloc(size);
+    if (new_motor == RT_NULL)
+    {
+        LOG_E("Falied to allocate memory for motor");
+        return RT_NULL;
+    }
+
+    return new_motor;
+}
+
 rt_err_t motor_enable(motor_t mot)
 {
     RT_ASSERT(mot != RT_NULL);

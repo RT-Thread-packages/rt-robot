@@ -15,42 +15,6 @@ struct dual_pwm_motor
     int pwm2_channel;
 };
 
-static rt_err_t dual_pwm_motor_enable(motor_t mot);
-static rt_err_t dual_pwm_motor_disable(motor_t mot);
-static rt_err_t dual_pwm_motor_set_speed(motor_t mot, rt_int16_t thousands);
-
-motor_t dual_pwm_motor_creat(char *pwm1, int pwm1_channel, char *pwm2, int pwm2_channel)
-{
-    dual_pwm_motor_t new_motor = (dual_pwm_motor_t)rt_malloc(sizeof(struct dual_pwm_motor));
-    if (new_motor == RT_NULL)
-    {
-        LOG_E("Falied to allocate memory for motor");
-        return RT_NULL;
-    }
-
-    new_motor->pwm1_dev = (struct rt_device_pwm*)rt_device_find(pwm1);
-    if (new_motor->pwm1_dev == RT_NULL)
-    {
-        rt_free(new_motor);
-        LOG_E("Falied to find device on %s", pwm1);
-        return RT_NULL;
-    }
-    new_motor->pwm2_dev = (struct rt_device_pwm*)rt_device_find(pwm2);
-    if (new_motor->pwm2_dev == RT_NULL)
-    {
-        rt_free(new_motor);
-        LOG_E("Falied to find device on %s", pwm2);
-        return RT_NULL;
-    }
-    new_motor->pwm1_channel = pwm1_channel;
-    new_motor->pwm2_channel = pwm2_channel;
-    new_motor->mot.enable = dual_pwm_motor_enable;
-    new_motor->mot.disable = dual_pwm_motor_disable;
-    new_motor->mot.set_speed = dual_pwm_motor_set_speed;
-
-    return &new_motor->mot;
-}
-
 static rt_err_t dual_pwm_motor_enable(motor_t mot)
 {
     RT_ASSERT(mot != RT_NULL);
@@ -108,4 +72,35 @@ static rt_err_t dual_pwm_motor_set_speed(motor_t mot, rt_int16_t thousands)
     }
 
     return RT_EOK;
+}
+
+motor_t dual_pwm_motor_create(char *pwm1, int pwm1_channel, char *pwm2, int pwm2_channel)
+{
+    dual_pwm_motor_t new_motor = (dual_pwm_motor_t)motor_create(sizeof(struct dual_pwm_motor));
+    if (new_motor == RT_NULL)
+    {
+        return RT_NULL;
+    }
+
+    new_motor->pwm1_dev = (struct rt_device_pwm*)rt_device_find(pwm1);
+    if (new_motor->pwm1_dev == RT_NULL)
+    {
+        rt_free(new_motor);
+        LOG_E("Falied to find device on %s", pwm1);
+        return RT_NULL;
+    }
+    new_motor->pwm2_dev = (struct rt_device_pwm*)rt_device_find(pwm2);
+    if (new_motor->pwm2_dev == RT_NULL)
+    {
+        rt_free(new_motor);
+        LOG_E("Falied to find device on %s", pwm2);
+        return RT_NULL;
+    }
+    new_motor->pwm1_channel = pwm1_channel;
+    new_motor->pwm2_channel = pwm2_channel;
+    new_motor->mot.enable = dual_pwm_motor_enable;
+    new_motor->mot.disable = dual_pwm_motor_disable;
+    new_motor->mot.set_speed = dual_pwm_motor_set_speed;
+
+    return &new_motor->mot;
 }
