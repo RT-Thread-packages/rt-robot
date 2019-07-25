@@ -4,17 +4,6 @@
 #define DBG_LEVEL DBG_LOG
 #include <rtdbg.h>
 
-typedef struct dual_pwm_motor *dual_pwm_motor_t;
-
-struct dual_pwm_motor
-{
-    struct motor mot;
-    struct rt_device_pwm *pwm1_dev;
-    int pwm1_channel;
-    struct rt_device_pwm *pwm2_dev;
-    int pwm2_channel;
-};
-
 static rt_err_t dual_pwm_motor_enable(motor_t mot)
 {
     RT_ASSERT(mot != RT_NULL);
@@ -74,7 +63,7 @@ static rt_err_t dual_pwm_motor_set_speed(motor_t mot, rt_int16_t thousands)
     return RT_EOK;
 }
 
-motor_t dual_pwm_motor_create(char *pwm1, int pwm1_channel, char *pwm2, int pwm2_channel)
+dual_pwm_motor_t dual_pwm_motor_create(char *pwm1, int pwm1_channel, char *pwm2, int pwm2_channel)
 {
     dual_pwm_motor_t new_motor = (dual_pwm_motor_t)motor_create(sizeof(struct dual_pwm_motor));
     if (new_motor == RT_NULL)
@@ -102,5 +91,5 @@ motor_t dual_pwm_motor_create(char *pwm1, int pwm1_channel, char *pwm2, int pwm2
     new_motor->mot.disable = dual_pwm_motor_disable;
     new_motor->mot.set_speed = dual_pwm_motor_set_speed;
 
-    return &new_motor->mot;
+    return new_motor;
 }

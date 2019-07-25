@@ -4,18 +4,6 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-typedef struct single_pwm_motor *single_pwm_motor_t;
-
-struct single_pwm_motor
-{
-    struct motor mot;
-    struct rt_device_pwm *pwm_dev;
-    int channel;
-    rt_base_t pin1;
-    rt_base_t pin2;
-};
-
-
 static rt_err_t single_pwm_motor_enable(motor_t mot)
 {
     RT_ASSERT(mot != RT_NULL);
@@ -76,7 +64,7 @@ static rt_err_t single_pwm_motor_set_speed(motor_t mot, rt_int16_t thousands)
 }
 
 
-motor_t single_pwm_motor_create(char *pwm, int channel, rt_base_t pin1, rt_base_t pin2)
+single_pwm_motor_t single_pwm_motor_create(char *pwm, int channel, rt_base_t pin1, rt_base_t pin2)
 {
     single_pwm_motor_t new_motor = (single_pwm_motor_t)motor_create(sizeof(struct single_pwm_motor));
     if (new_motor == RT_NULL)
@@ -101,5 +89,5 @@ motor_t single_pwm_motor_create(char *pwm, int channel, rt_base_t pin1, rt_base_
     rt_pin_mode(new_motor->pin1, PIN_MODE_OUTPUT);
     rt_pin_mode(new_motor->pin2, PIN_MODE_OUTPUT);
 
-    return &new_motor->mot;
+    return new_motor;
 }
