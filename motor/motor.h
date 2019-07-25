@@ -1,5 +1,5 @@
-#include "motor_one_pwm.h"
-#include "motor_two_pwm.h"
+#include "single_pwm_motor.h"
+#include "dual_pwm_motor.h"
 
 #ifndef __MOTOR_H__
 #define __MOTOR_H__

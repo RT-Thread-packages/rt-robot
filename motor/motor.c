@@ -6,6 +6,8 @@
 
 rt_err_t motor_enable(motor_t mot)
 {
+    RT_ASSERT(mot != RT_NULL);
+
     // Enable PWM
     LOG_D("Enabling motor");
     mot->enable(mot);
@@ -15,6 +17,8 @@ rt_err_t motor_enable(motor_t mot)
 
 rt_err_t motor_disable(motor_t mot)
 {
+    RT_ASSERT(mot != RT_NULL);
+
     // Disable PWM
     LOG_D("Disabling motor");
     mot->disable(mot);
@@ -24,6 +28,8 @@ rt_err_t motor_disable(motor_t mot)
 
 rt_err_t motor_run(motor_t mot, rt_int16_t thousands)
 {
+    RT_ASSERT(mot != RT_NULL);
+
     // Set speed (pwm) to desired value
     // LOG_D("Set motor speed %d pwm", pwm);
     mot->set_speed(mot, thousands);
@@ -33,6 +39,8 @@ rt_err_t motor_run(motor_t mot, rt_int16_t thousands)
 
 rt_err_t motor_stop(motor_t mot)
 {
+    RT_ASSERT(mot != RT_NULL);
+
     // Set Speed to 0
     motor_run(mot, 0);
 
@@ -41,6 +49,8 @@ rt_err_t motor_stop(motor_t mot)
 
 rt_err_t motor_destroy(motor_t mot)
 {
+    RT_ASSERT(mot != RT_NULL);
+    
     // Disable first
     motor_disable(mot);
 
