@@ -20,6 +20,7 @@ pid_control_t pid_create(void)
 
     new_pid->maximum = 100;
     new_pid->minimum = 20;
+    new_pid->anti_windup_value = new_pid->maximum * 2.0f;
 
     new_pid->p_error = 10.0f;
     new_pid->i_error = 1.0f;
@@ -75,6 +76,12 @@ rt_err_t pid_set_target(pid_control_t pid, rt_int16_t set_point)
     return RT_EOK;
 }
 
+rt_err_t pid_set_anti_windup_value(pid_control_t pid, float anti_windup_value)
+{
+    pid->anti_windup_value = anti_windup_value;
+    return RT_EOK;
+}
+
 rt_err_t pid_set_sample_time(pid_control_t pid, rt_uint16_t sample_time)
 {
     // TODO
@@ -95,6 +102,14 @@ float pid_update(pid_control_t pid, rt_int16_t current_point)
     pid->error = pid->set_point - current_point;
 
     pid->integral += pid->error;
+
+    //Perform integral value capping to avoid internal PID state to blows up
+    //when actuators saturate:
+    if(pid->integral > pid->anti_windup_value) {
+        pid->integral = pid->anti_windup_value;
+    } else if (pid->integral < -pid->anti_windup_value) {
+        pid->integral = -pid->anti_windup_value;
+    }
 
     pid->p_error = pid->kp * pid->error;
     pid->i_error = pid->ki * pid->integral;
