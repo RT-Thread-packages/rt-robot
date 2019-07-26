@@ -4,6 +4,14 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
+struct ab_phase_encoder
+{
+    struct encoder  enc;
+    rt_base_t       pin_a;            /* interrupt pin  */
+    rt_base_t       pin_b;
+    rt_int16_t      last_value;
+};
+
 static const uint8_t AB_PHASE_ENCODER_TABLE[4] = {2, 0, 3, 1};
 
 static void encoder_isr(void *args)
@@ -24,7 +32,7 @@ static void encoder_isr(void *args)
     enc_sub->last_value = val;
 }
 
-static rt_err_t ab_phase_encoder_enable(encoder_t enc)
+static rt_err_t ab_phase_encoder_enable(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
@@ -43,7 +51,7 @@ static rt_err_t ab_phase_encoder_enable(encoder_t enc)
     return RT_EOK;
 }
 
-static rt_err_t ab_phase_encoder_disable(encoder_t enc)
+static rt_err_t ab_phase_encoder_disable(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
@@ -55,7 +63,7 @@ static rt_err_t ab_phase_encoder_disable(encoder_t enc)
     return RT_EOK;
 }
 
-static rt_err_t ab_phase_encoder_destroy(encoder_t enc)
+static rt_err_t ab_phase_encoder_destroy(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 

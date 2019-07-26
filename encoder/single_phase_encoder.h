@@ -3,12 +3,7 @@
 
 #include "encoder.h"
 
-struct single_phase_encoder
-{
-    struct encoder  enc;
-    rt_base_t       pin;            /* interrupt pin  */
-};
-
+struct single_phase_encoder;
 typedef struct single_phase_encoder *single_phase_encoder_t;
 
 single_phase_encoder_t single_phase_encoder_create(rt_base_t pin, rt_uint16_t pulse_revol);

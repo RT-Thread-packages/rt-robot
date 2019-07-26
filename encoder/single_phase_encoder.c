@@ -4,6 +4,12 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
+struct single_phase_encoder
+{
+    struct encoder  enc;
+    rt_base_t       pin;            /* interrupt pin  */
+};
+
 static void encoder_isr(void *args)
 {
     rt_int32_t* pulse_count = (rt_int32_t*)args;
@@ -11,7 +17,7 @@ static void encoder_isr(void *args)
     // LOG_D("Count %d", *pulse_count);
 }
 
-static rt_err_t single_phase_encoder_enable(encoder_t enc)
+static rt_err_t single_phase_encoder_enable(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
@@ -25,7 +31,7 @@ static rt_err_t single_phase_encoder_enable(encoder_t enc)
     return rt_pin_irq_enable(enc_sub->pin, PIN_IRQ_ENABLE);
 }
 
-static rt_err_t single_phase_encoder_disable(encoder_t enc)
+static rt_err_t single_phase_encoder_disable(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
@@ -34,7 +40,7 @@ static rt_err_t single_phase_encoder_disable(encoder_t enc)
     return rt_pin_irq_enable(enc_sub->pin, PIN_IRQ_DISABLE);;
 }
 
-static rt_err_t single_phase_encoder_destroy(encoder_t enc)
+static rt_err_t single_phase_encoder_destroy(void *enc)
 {
     RT_ASSERT(enc != RT_NULL);
 

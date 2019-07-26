@@ -21,9 +21,9 @@ struct encoder
     rt_int32_t              last_count;
     rt_int16_t              cps;
     enum encoder_direction  dir;
-    rt_err_t                (*enable)(encoder_t enc);
-    rt_err_t                (*disable)(encoder_t enc);
-    rt_err_t                (*destroy)(encoder_t enc);
+    rt_err_t                (*enable)(void *enc);
+    rt_err_t                (*disable)(void *enc);
+    rt_err_t                (*destroy)(void *enc);
 };
 
 encoder_t       encoder_create(rt_size_t size);
