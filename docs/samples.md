@@ -37,21 +37,20 @@ pid_control_t right_pid = pid_create();
 c_wheels[0] = wheel_create(left_motor,  left_encoder,  left_pid,  WHEEL_RADIUS, GEAR_RATIO);
 c_wheels[1] = wheel_create(right_motor, right_encoder, right_pid, WHEEL_RADIUS, GEAR_RATIO);
 
-
 // 2. Iinialize Kinematics - Two Wheel Differential Drive
 kinematics_t c_kinematics = kinematics_create(TWO_WD, WHEEL_DIST_X, WHEEL_DIST_Y, WHEEL_RADIUS);
 
 // 3. Initialize Chassis
 chas = chassis_create(c_wheels, c_kinematics);
 
-// 4. Enable Chassis
-chassis_enable(chas);
-
-// Set Sample time
+// 4. Set Sample time
 encoder_set_sample_time(chas->c_wheels[0]->w_encoder, SAMPLE_TIME);
 encoder_set_sample_time(chas->c_wheels[1]->w_encoder, SAMPLE_TIME);
 pid_set_sample_time(chas->c_wheels[0]->w_pid, PID_SAMPLE_TIME);
 pid_set_sample_time(chas->c_wheels[1]->w_pid, PID_SAMPLE_TIME);
+
+// 5. Enable Chassis
+chassis_enable(chas);
 
 // Turn left
 target_vel.linear_x = 0;   // m/s
