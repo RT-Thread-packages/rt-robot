@@ -11,9 +11,9 @@ typedef struct motor *motor_t;
 
 struct motor
 {
-    rt_err_t    (*enable)(motor_t mot);
-    rt_err_t    (*disable)(motor_t mot);
-    rt_err_t    (*set_speed)(motor_t mot, rt_int16_t thousands);
+    rt_err_t    (*enable)(void *mot);
+    rt_err_t    (*disable)(void *mot);
+    rt_err_t    (*set_speed)(void *mot, rt_int16_t thousands);
 };
 
 motor_t  motor_create(rt_size_t size);
