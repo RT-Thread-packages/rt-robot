@@ -9,14 +9,6 @@ Change From YFRobot. www.yfrobot.com
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-#define HAL_CS_H()                  rt_pin_write(PS2_DEFAULT_CS_PIN, PIN_HIGH)
-#define HAL_CS_L()                  rt_pin_write(PS2_DEFAULT_CS_PIN, PIN_LOW)
-#define HAL_CLK_H()                 rt_pin_write(PS2_DEFAULT_CLK_PIN, PIN_HIGH)
-#define HAL_CLK_L()                 rt_pin_write(PS2_DEFAULT_CLK_PIN, PIN_LOW)
-#define HAL_DO_H()                  rt_pin_write(PS2_DEFAULT_DO_PIN, PIN_HIGH)
-#define HAL_DO_L()                  rt_pin_write(PS2_DEFAULT_DO_PIN, PIN_LOW)
-#define HAL_GET_DI()                rt_pin_read(PS2_DEFAULT_DI_PIN)
-
 #define THREAD_DELAY_TIME           50
 
 #define THREAD_PRIORITY             16
@@ -28,6 +20,40 @@ Change From YFRobot. www.yfrobot.com
 static uint8_t light_mode = PS2_NO_MODE;
 static rt_thread_t tid_ps2 = RT_NULL;
 static struct ps2_table table[PS2_TABLE_SIZE] = PS2_DEFAULT_TABLE;
+
+static rt_base_t ps2_cs_pin; 
+static rt_base_t ps2_clk_pin;
+static rt_base_t ps2_do_pin; 
+static rt_base_t ps2_di_pin;
+
+static void hal_cs_high(void)
+{
+    rt_pin_write(ps2_cs_pin, PIN_HIGH);
+}
+static void hal_cs_low(void)
+{
+    rt_pin_write(ps2_cs_pin, PIN_LOW);
+}
+static void hal_clk_high(void)
+{
+    rt_pin_write(ps2_clk_pin, PIN_HIGH);
+}
+static void hal_clk_low(void)
+{
+    rt_pin_write(ps2_clk_pin, PIN_LOW);
+}
+static void hal_do_high(void)
+{
+    rt_pin_write(ps2_do_pin, PIN_HIGH);
+}
+static void hal_do_low(void)
+{
+    rt_pin_write(ps2_do_pin, PIN_LOW);
+}
+static int hal_read_di(void)
+{
+    return rt_pin_read(ps2_di_pin);
+}
 
 static void _delay_us(uint16_t us)
 {
@@ -45,17 +71,17 @@ static uint8_t _transfer(uint8_t data)
     for (uint16_t i = 0x01; i < 0x0100; i <<= 1)
     {
         if (i & data)
-            HAL_DO_H(); 
+            hal_do_high(); 
         else
-            HAL_DO_L();
+            hal_do_low();
 
-        HAL_CLK_H();
+        hal_clk_high();
         KEEP_TIME();
-        HAL_CLK_L();
-        if (HAL_GET_DI())
+        hal_clk_low();
+        if (hal_read_di())
             temp = i | temp;
         KEEP_TIME();
-        HAL_CLK_H();
+        hal_clk_high();
     }
     
     return temp;
@@ -63,13 +89,13 @@ static uint8_t _transfer(uint8_t data)
 
 static void transfer(const uint8_t *pb_send, uint8_t *pb_recv, uint8_t len)
 {
-    HAL_CS_L();
+    hal_cs_low();
     _delay_us(16);
     for (uint8_t i = 0; i < len; i++)
     {
         pb_recv[i] = _transfer(pb_send[i]);
     }
-    HAL_CS_H();
+    hal_cs_high();
     _delay_us(16);
 }
 
@@ -130,18 +156,44 @@ static void ps2_thread_entry(void *param)
                 }
             }
         }
+
+        // rocker
+        if (ps2_read_light() == PS2_RED_MODE)
+        {
+            if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
+            {
+                command_handle(table[PS2_ROCKER_LX].standard_cmd, &ctrl_data.left_stick_x);
+            }
+            if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
+            {
+                command_handle(table[PS2_ROCKER_LY].standard_cmd, &ctrl_data.left_stick_y);
+            }
+            if (table[PS2_ROCKER_RX].standard_cmd != COMMAND_NONE)
+            {
+                command_handle(table[PS2_ROCKER_RX].standard_cmd, &ctrl_data.right_stick_x);
+            }
+            if (table[PS2_ROCKER_RY].standard_cmd != COMMAND_NONE)
+            {
+                command_handle(table[PS2_ROCKER_RY].standard_cmd, &ctrl_data.right_stick_y);
+            }
+        }
     }
 }
 
-void ps2_init(void)
+void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin)
 {
-    rt_pin_mode(PS2_DEFAULT_CS_PIN,  PIN_MODE_OUTPUT);
-    rt_pin_mode(PS2_DEFAULT_CLK_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(PS2_DEFAULT_DO_PIN,  PIN_MODE_OUTPUT);
-    rt_pin_mode(PS2_DEFAULT_DI_PIN,  PIN_MODE_INPUT);
+    ps2_cs_pin = cs_pin;
+    ps2_clk_pin = clk_pin;
+    ps2_do_pin = do_pin;
+    ps2_di_pin = di_pin;
 
-    HAL_CS_H();
-    HAL_CLK_H();
+    rt_pin_mode(ps2_cs_pin,  PIN_MODE_OUTPUT);
+    rt_pin_mode(ps2_clk_pin, PIN_MODE_OUTPUT);
+    rt_pin_mode(ps2_do_pin,  PIN_MODE_OUTPUT);
+    rt_pin_mode(ps2_di_pin,  PIN_MODE_INPUT);
+    
+    hal_cs_high();
+    hal_clk_high();
 
     tid_ps2 = rt_thread_create("ps2",
                           ps2_thread_entry, RT_NULL,

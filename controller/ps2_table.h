@@ -1,6 +1,6 @@
 #include "ps2.h"
 
-#define PS2_TABLE_SIZE      16
+#define PS2_TABLE_SIZE      20
 #define PS2_DEFAULT_TABLE                \
 {                                        \
     {PS2_BTN_SELECT   ,COMMAND_CAR_STOP},    \
@@ -18,7 +18,11 @@
     {PS2_BTN_TRIANGLE ,COMMAND_NONE},    \
     {PS2_BTN_CICLE    ,COMMAND_NONE},    \
     {PS2_BTN_FORK     ,COMMAND_NONE},    \
-    {PS2_BTN_SQUARE   ,COMMAND_NONE}     \
+    {PS2_BTN_SQUARE   ,COMMAND_NONE},    \
+    {PS2_ROCKER_LX    ,COMMAND_NONE},    \
+    {PS2_ROCKER_LY    ,COMMAND_NONE},    \
+    {PS2_ROCKER_RX    ,COMMAND_NONE},    \
+    {PS2_ROCKER_RY    ,COMMAND_NONE}    \
 }
 
 struct ps2_table
@@ -26,4 +30,3 @@ struct ps2_table
     int ps2_cmd;
     int standard_cmd;
 };
-
