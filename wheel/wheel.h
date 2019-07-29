@@ -14,9 +14,9 @@ struct wheel
 {
     motor_t         w_motor;
     encoder_t       w_encoder;
-    pid_control_t           w_pid;
+    pid_control_t   w_pid;
 
-    rt_uint16_t     rpm;
+    rt_int16_t      rpm;
     float           radius;
     rt_uint16_t     gear_ratio;
 };

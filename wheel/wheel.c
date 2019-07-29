@@ -98,13 +98,13 @@ void wheel_update(wheel_t whl)
 {
     // TODO
     // Get current rpm
-    rt_int16_t current_point = encoder_measure_rpm(whl->w_encoder);
+    whl->rpm = encoder_measure_rpm(whl->w_encoder);
 
     // PID calculation
-    rt_int8_t pwm = pid_update(whl->w_pid, current_point);
+    rt_int16_t speed = pid_update(whl->w_pid, whl->rpm);
 
-    // Set PWM
-    motor_run(whl->w_motor, pwm);
+    // Set speed
+    motor_run(whl->w_motor, speed);
 }
 
 void wheel_stop(wheel_t whl)
