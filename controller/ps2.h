@@ -5,12 +5,6 @@
 #include <rtdevice.h>
 #include <command.h>
 
-// PIN
-#define PS2_DEFAULT_CS_PIN          28 // GET_PIN(B, 12)
-#define PS2_DEFAULT_CLK_PIN         29 // GET_PIN(B, 13)
-#define PS2_DEFAULT_DO_PIN          31 // GET_PIN(B, 15)
-#define PS2_DEFAULT_DI_PIN          30 // GET_PIN(B, 14)
-
 // COMMAND
 #define PS2_CMD_VIBRATE     1
 
@@ -37,13 +31,12 @@
 #define PS2_BTN_FORK        (1 << 14)
 #define PS2_BTN_SQUARE      (1 << 15)
 
-#define PS2_ROCKER_LX       (9)
-#define PS2_ROCKER_LY       (10)
-#define PS2_ROCKER_RX       (11)
-#define PS2_ROCKER_RY       (12)
+#define PS2_ROCKER_LX       (16)
+#define PS2_ROCKER_LY       (17)
+#define PS2_ROCKER_RX       (18)
+#define PS2_ROCKER_RY       (19)
 
 typedef struct ps2_ctrl_data *ps2_ctrl_data_t;
-typedef struct ps2           *ps2_t;
 
 struct ps2_ctrl_data
 {
@@ -54,7 +47,7 @@ struct ps2_ctrl_data
     uint8_t right_stick_y;
 };
 
-void ps2_init(void);
+void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin);
 int  ps2_scan(ps2_ctrl_data_t pt);
 int  ps2_read_light(void);
 
