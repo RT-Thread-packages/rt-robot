@@ -1,33 +1,33 @@
-#include "inc_pid_control.h"
+#include "inc_pid_controller.h"
 
-#define DBG_SECTION_NAME  "inc_pid_control"
+#define DBG_SECTION_NAME  "inc_pid_controller"
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-static rt_err_t inc_pid_control_reset(void *pid)
+static rt_err_t inc_pid_controller_reset(void *pid)
 {
-    rt_memset(pid, 0, sizeof(struct inc_pid_control));
+    rt_memset(pid, 0, sizeof(struct inc_pid_controller));
     return RT_EOK;
 }
 
-static rt_err_t inc_pid_control_destroy(void *pid)
+static rt_err_t inc_pid_controller_destroy(void *pid)
 {
     rt_free(pid);
     return RT_EOK;
 }
 
-static rt_err_t inc_pid_control_update(void *pid, float current_point)
+static rt_err_t inc_pid_controller_update(void *pid, float current_point)
 {
-    inc_pid_control_t inc_pid = (inc_pid_control_t)pid;
+    inc_pid_controller_t inc_pid = (inc_pid_controller_t)pid;
     // TODO
-    if((rt_tick_get() - inc_pid->last_time) < rt_tick_from_millisecond(inc_pid->control.sample_time))
+    if((rt_tick_get() - inc_pid->last_time) < rt_tick_from_millisecond(inc_pid->controller.sample_time))
     {
         LOG_D("PID waiting ... ");
         return RT_EBUSY;
     }
     inc_pid->last_time = rt_tick_get();
 
-    inc_pid->error = inc_pid->control.target - current_point;
+    inc_pid->error = inc_pid->controller.target - current_point;
 
     inc_pid->p_error = inc_pid->kp * (inc_pid->error - inc_pid->error_l);
     inc_pid->i_error = inc_pid->ki * inc_pid->error;
@@ -47,7 +47,7 @@ static rt_err_t inc_pid_control_update(void *pid, float current_point)
     inc_pid->error_ll = inc_pid->error_l;
     inc_pid->error_l = inc_pid->error;
 
-    inc_pid->control.output = inc_pid->last_out;
+    inc_pid->controller.output = inc_pid->last_out;
 
     // rt_kprintf("%d - %d\n", current_point, pid->set_point);
     // LOG_D("PID current: %d : setpoint %d - P%d I%d D%d - [%d]", current_point, pid->set_point, (int)(pid->p_error + 0.5f), (int)(pid->i_error + 0.5f), (int)(pid->d_error + 0.5f), (int)(pid->out + 0.5f));
@@ -60,9 +60,9 @@ static rt_err_t inc_pid_control_update(void *pid, float current_point)
     return RT_EOK;
 }
 
-inc_pid_control_t inc_pid_control_create(float kp, float ki, float kd)
+inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd)
 {
-    inc_pid_control_t new_pid = (inc_pid_control_t)auto_control_create(sizeof(struct inc_pid_control));
+    inc_pid_controller_t new_pid = (inc_pid_controller_t)controller_create(sizeof(struct inc_pid_controller));
     if(new_pid == RT_NULL)
     {
         return RT_NULL;
@@ -85,14 +85,14 @@ inc_pid_control_t inc_pid_control_create(float kp, float ki, float kd)
 
     new_pid->last_out = 0.0f;
 
-    new_pid->control.reset = inc_pid_control_reset;
-    new_pid->control.destroy = inc_pid_control_destroy;
-    new_pid->control.update = inc_pid_control_update;
+    new_pid->controller.reset = inc_pid_controller_reset;
+    new_pid->controller.destroy = inc_pid_controller_destroy;
+    new_pid->controller.update = inc_pid_controller_update;
 
     return new_pid;
 }
 
-rt_err_t inc_pid_control_set_kp(inc_pid_control_t pid, float kp)
+rt_err_t inc_pid_controller_set_kp(inc_pid_controller_t pid, float kp)
 {
     RT_ASSERT(pid != RT_NULL);
 
@@ -100,7 +100,7 @@ rt_err_t inc_pid_control_set_kp(inc_pid_control_t pid, float kp)
     return RT_EOK;
 }
 
-rt_err_t inc_pid_control_set_ki(inc_pid_control_t pid, float ki)
+rt_err_t inc_pid_controller_set_ki(inc_pid_controller_t pid, float ki)
 {
     RT_ASSERT(pid != RT_NULL);
     
@@ -108,7 +108,7 @@ rt_err_t inc_pid_control_set_ki(inc_pid_control_t pid, float ki)
     return RT_EOK;
 }
 
-rt_err_t inc_pid_control_set_kd(inc_pid_control_t pid, float kd)
+rt_err_t inc_pid_controller_set_kd(inc_pid_controller_t pid, float kd)
 {
     RT_ASSERT(pid != RT_NULL);
 

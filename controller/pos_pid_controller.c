@@ -1,38 +1,38 @@
-#include "pos_pid_control.h"
+#include "pos_pid_controller.h"
 
-#define DBG_SECTION_NAME  "pos_pid_control"
+#define DBG_SECTION_NAME  "pos_pid_controller"
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-static rt_err_t pos_pid_control_reset(void *pid)
+static rt_err_t pos_pid_controller_reset(void *pid)
 {
-    rt_memset(pid, 0, sizeof(struct pos_pid_control));
+    rt_memset(pid, 0, sizeof(struct pos_pid_controller));
     return RT_EOK;
 }
 
-static rt_err_t pos_pid_control_destroy(void *pid)
+static rt_err_t pos_pid_controller_destroy(void *pid)
 {
     rt_free(pid);
     return RT_EOK;
 }
 
-static rt_err_t pos_pid_control_update(void *pid, float current_point)
+static rt_err_t pos_pid_controller_update(void *pid, float current_point)
 {
-    pos_pid_control_t pos_pid = (pos_pid_control_t)pid;
+    pos_pid_controller_t pos_pid = (pos_pid_controller_t)pid;
 
-    if((rt_tick_get() - pos_pid->last_time) < rt_tick_from_millisecond(pos_pid->control.sample_time))
+    if((rt_tick_get() - pos_pid->last_time) < rt_tick_from_millisecond(pos_pid->controller.sample_time))
     {
         LOG_D("PID waiting ... ");
         return RT_EBUSY;
     }
     pos_pid->last_time = rt_tick_get();
 
-    pos_pid->error = pos_pid->control.target - current_point;
+    pos_pid->error = pos_pid->controller.target - current_point;
 
     pos_pid->integral += pos_pid->error;
 
     //Perform integral value capping to avoid internal PID state to blows up
-    //when controltuators saturate:
+    //when controllertuators saturate:
     if(pos_pid->integral > pos_pid->anti_windup_value) {
         pos_pid->integral = pos_pid->anti_windup_value;
     } else if (pos_pid->integral < -pos_pid->anti_windup_value) {
@@ -55,7 +55,7 @@ static rt_err_t pos_pid_control_update(void *pid, float current_point)
 
     pos_pid->error_l = pos_pid->error;
 
-    pos_pid->control.output = pos_pid->last_out;
+    pos_pid->controller.output = pos_pid->last_out;
 
     // rt_kprintf("%d - %d\n", current_point, pid->set_point);
     // LOG_D("PID current: %d : setpoint %d - P%d I%d D%d - [%d]", current_point, pid->set_point, (int)(pid->p_error + 0.5f), (int)(pid->i_error + 0.5f), (int)(pid->d_error + 0.5f), (int)(pid->out + 0.5f));
@@ -68,9 +68,9 @@ static rt_err_t pos_pid_control_update(void *pid, float current_point)
     return RT_EOK;
 }
 
-pos_pid_control_t pos_pid_control_create(float kp, float ki, float kd)
+pos_pid_controller_t pos_pid_controller_create(float kp, float ki, float kd)
 {
-    pos_pid_control_t new_pid = (pos_pid_control_t)auto_control_create(sizeof(struct pos_pid_control));
+    pos_pid_controller_t new_pid = (pos_pid_controller_t)controller_create(sizeof(struct pos_pid_controller));
     if(new_pid == RT_NULL)
     {
         return RT_NULL;
@@ -94,26 +94,26 @@ pos_pid_control_t pos_pid_control_create(float kp, float ki, float kd)
 
     new_pid->last_out = 0.0f;
 
-    new_pid->control.reset = pos_pid_control_reset;
-    new_pid->control.destroy = pos_pid_control_destroy;
-    new_pid->control.update = pos_pid_control_update;
+    new_pid->controller.reset = pos_pid_controller_reset;
+    new_pid->controller.destroy = pos_pid_controller_destroy;
+    new_pid->controller.update = pos_pid_controller_update;
 
     return new_pid;
 }
 
-rt_err_t pos_pid_control_set_kp(pos_pid_control_t pid, float kp)
+rt_err_t pos_pid_controller_set_kp(pos_pid_controller_t pid, float kp)
 {
     pid->kp = kp;
     return RT_EOK;
 }
 
-rt_err_t pos_pid_control_set_ki(pos_pid_control_t pid, float ki)
+rt_err_t pos_pid_controller_set_ki(pos_pid_controller_t pid, float ki)
 {
     pid->ki = ki;
     return RT_EOK;
 }
 
-rt_err_t pos_pid_control_set_kd(pos_pid_control_t pid, float kd)
+rt_err_t pos_pid_controller_set_kd(pos_pid_controller_t pid, float kd)
 {
     pid->kd = kd;
     return RT_EOK;
