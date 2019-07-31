@@ -4,7 +4,7 @@
 #include <rtthread.h>
 #include <encoder.h>
 #include <motor.h>
-#include <pid.h>
+#include <controller.h>
 
 #define PI 3.1415926
 
@@ -14,14 +14,14 @@ struct wheel
 {
     motor_t         w_motor;
     encoder_t       w_encoder;
-    pid_control_t           w_pid;
+    controller_t    w_controller;
 
-    rt_uint16_t     rpm;
+    rt_int16_t      rpm;
     float           radius;
     rt_uint16_t     gear_ratio;
 };
 
-wheel_t     wheel_create(motor_t w_motor, encoder_t w_encoder, pid_control_t w_pid, float radius, rt_uint16_t gear_ratio);
+wheel_t     wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_controller, float radius, rt_uint16_t gear_ratio);
 void        wheel_destroy(wheel_t wheel);
 
 rt_err_t    wheel_enable(wheel_t whl);
