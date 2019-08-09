@@ -35,7 +35,7 @@ rt_err_t        encoder_reset(encoder_t enc);                                   
 rt_err_t        encoder_set_sample_time(encoder_t enc, rt_uint16_t sample_time);    /* set sample time */
 
 /** rpm = pulse_count / sample_time(ms) / pulse_revol * 1000 * 60 **/
-rt_int16_t      encoder_read(encoder_t enc);                                        /* return pulse_count */
+rt_int32_t      encoder_read(encoder_t enc);                                        /* return pulse_count */
 rt_int16_t      encoder_measure_cps(encoder_t enc);                                 /* pulse_count per second */
 rt_int16_t      encoder_measure_rpm(encoder_t enc);                                 /* revolutions per minute */
 
