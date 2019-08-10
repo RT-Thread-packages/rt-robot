@@ -45,7 +45,7 @@ rt_err_t encoder_disable(encoder_t enc)
     return enc->disable(enc);
 }
 
-rt_int16_t encoder_read(encoder_t enc)
+rt_int32_t encoder_read(encoder_t enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
