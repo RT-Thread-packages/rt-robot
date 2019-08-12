@@ -12,25 +12,21 @@
 #define COMMAND_CAR_TURNRIGHT           5
 #define COMMAND_GET_CAR_SPEED           6
 
-#define COMMAND_CONTROLLER_VIBRATE      100
+// #define COMMAND_CAR_FORWARD_WITH_PARAM
 
-typedef struct command_sender *command_sender_t;
+#define COMMAND_RC_VIBRATE              -1
 
-struct command_sender
+struct command_info
 {
-    char *name;
-    void (*send)(rt_int8_t cmd, void *param, rt_uint16_t len);
+    void       *target;
+    rt_int16_t cmd;
+    void       *param;
 };
 
-struct command
-{
-    rt_int8_t   robot_cmd;
-    rt_err_t    (*handler)(rt_int8_t cmd, void *param);
-};
+typedef struct command_info *command_info_t;
 
-rt_err_t command_register(rt_int8_t cmd, rt_err_t (*handler)(rt_int8_t cmd, void *param));
-rt_err_t command_unregister(rt_int8_t cmd);
-rt_err_t command_handle(rt_int8_t cmd, void *param);
-rt_err_t command_send(command_sender_t sender, rt_int8_t cmd, void *param, rt_uint16_t len);
+rt_err_t command_register(rt_int16_t cmd, void (*handler)(command_info_t info));
+rt_err_t command_unregister(rt_int16_t cmd);
+rt_err_t command_send(command_info_t info);
 
 #endif

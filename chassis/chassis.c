@@ -1,4 +1,5 @@
 #include "chassis.h"
+#include <command.h>
 
 #define DBG_SECTION_NAME  "chassis"
 #define DBG_LEVEL         DBG_LOG
@@ -92,46 +93,40 @@ rt_err_t chassis_update(chassis_t chas)
     return RT_EOK;
 }
 
-rt_err_t chassis_parse_command(chassis_t chas, rt_int8_t cmd, void *args)
+static void chassis_stop(command_info_t info)
+{
+    rt_kprintf("stop cmd\n");
+}
+static void chassis_forward(command_info_t info)
+{
+
+}
+static void chassis_backward(command_info_t info)
+{
+
+}
+static void chassis_turn_left(command_info_t info)
+{
+
+}
+static void chassis_turn_right(command_info_t info)
+{
+
+}
+static void chassis_move_left(command_info_t info)
+{
+
+}
+static void chassis_move_right(command_info_t info)
+{
+
+}
+
+static void chassis_command_register(void)
 {
     // TODO
-    struct velocity target_vel;
+    command_register(COMMAND_CAR_STOP, chassis_stop);
     
-    LOG_D("received command: cmd:%d arg:%d", cmd, *((rt_uint8_t *)args));
-
-    switch (cmd)
-    {
-    case CHASSIS_FORWARD_ANALOG:
-        target_vel.linear_x = (float)*((rt_uint8_t *)args) / 100.0f;   // m/s
-        target_vel.linear_y = 0;
-        target_vel.angular_z = 0;
-        break;
-    case CHASSIS_BACKWARD_ANALOG:
-        target_vel.linear_x = -(float)*((rt_uint8_t *)args) / 100.0f;
-        target_vel.linear_y = 0;
-        target_vel.angular_z = 0;
-        break;
-    case CHASSIS_TURN_LEFT_ANALOG:
-        target_vel.linear_x = 0.00f;
-        target_vel.linear_y = 0;
-        target_vel.angular_z = (float)*((rt_uint8_t *)args);
-        break;
-    case CHASSIS_TURN_RIGHT_ANALOG:
-        target_vel.linear_x = 0.00f;
-        target_vel.linear_y = 0;
-        target_vel.angular_z = -(float)*((rt_uint8_t *)args);
-        break;
-    case CHASSIS_STOP:
-        target_vel.linear_x = 0.00f;
-        target_vel.linear_y = 0;
-        target_vel.angular_z = 0;
-        break;
-    default:
-        return RT_ERROR;
-        break;
-    }
-
-    chassis_set_velocity(chas, target_vel);
-
-    return RT_EOK;
 }
+
+INIT_APP_EXPORT(chassis_command_register);

@@ -9,9 +9,9 @@ Change From YFRobot. www.yfrobot.com
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-#define THREAD_DELAY_TIME           50
+#define THREAD_DELAY_TIME           30
 
-#define THREAD_PRIORITY             16
+#define THREAD_PRIORITY             ((RT_THREAD_PRIORITY_MAX / 3) + 2)
 #define THREAD_STACK_SIZE           1024
 #define THREAD_TIMESLICE            10
 
@@ -25,6 +25,8 @@ static rt_base_t ps2_cs_pin;
 static rt_base_t ps2_clk_pin;
 static rt_base_t ps2_do_pin; 
 static rt_base_t ps2_di_pin;
+
+static struct command_info cmd_info;
 
 static void hal_cs_high(void)
 {
@@ -140,7 +142,6 @@ int ps2_read_light(void)
 static void ps2_thread_entry(void *param)
 {
     struct ps2_ctrl_data ctrl_data;
-
     while (1)
     {
         rt_thread_mdelay(THREAD_DELAY_TIME);   
@@ -152,7 +153,8 @@ static void ps2_thread_entry(void *param)
             {
                 if (table[i].standard_cmd != COMMAND_NONE)
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL);
+                    cmd_info.cmd = table[i].standard_cmd;
+                    command_send(&cmd_info);
                 }
             }
         }
@@ -162,25 +164,33 @@ static void ps2_thread_entry(void *param)
         {
             if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
             {
-                command_handle(table[PS2_ROCKER_LX].standard_cmd, &ctrl_data.left_stick_x);
+                cmd_info.cmd = table[PS2_ROCKER_LX].standard_cmd;
+                cmd_info.param = &ctrl_data.left_stick_x;
+                command_send(&cmd_info);
             }
             if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
             {
-                command_handle(table[PS2_ROCKER_LY].standard_cmd, &ctrl_data.left_stick_y);
+                cmd_info.cmd = table[PS2_ROCKER_LY].standard_cmd;
+                cmd_info.param = &ctrl_data.left_stick_y;
+                command_send(&cmd_info);
             }
             if (table[PS2_ROCKER_RX].standard_cmd != COMMAND_NONE)
             {
-                command_handle(table[PS2_ROCKER_RX].standard_cmd, &ctrl_data.right_stick_x);
+                cmd_info.cmd = table[PS2_ROCKER_RX].standard_cmd;
+                cmd_info.param = &ctrl_data.right_stick_x;
+                command_send(&cmd_info);
             }
             if (table[PS2_ROCKER_RY].standard_cmd != COMMAND_NONE)
             {
-                command_handle(table[PS2_ROCKER_RY].standard_cmd, &ctrl_data.right_stick_y);
+                cmd_info.cmd = table[PS2_ROCKER_RY].standard_cmd;
+                cmd_info.param = &ctrl_data.right_stick_y;
+                command_send(&cmd_info);
             }
         }
     }
 }
 
-void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin)
+void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin, void *target)
 {
     ps2_cs_pin = cs_pin;
     ps2_clk_pin = clk_pin;
@@ -194,6 +204,8 @@ void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t d
     
     hal_cs_high();
     hal_clk_high();
+
+    cmd_info.target = target;
 
     tid_ps2 = rt_thread_create("ps2",
                           ps2_thread_entry, RT_NULL,
