@@ -3,30 +3,78 @@
 
 #include <rtthread.h>
 
-// command
-#define COMMAND_NONE                    0
-#define COMMAND_CAR_STOP                1
-#define COMMAND_CAR_FORWARD             2
-#define COMMAND_CAR_BACKWARD            3
-#define COMMAND_CAR_TURNLEFT            4
-#define COMMAND_CAR_TURNRIGHT           5
-#define COMMAND_GET_CAR_SPEED           6
+/* Command */
+// down-link
+#define COMMAND_NONE                            0X0000
+#define COMMAND_CAR_STOP                        0X0001
+#define COMMAND_CAR_FORWARD                     0X0002
+#define COMMAND_CAR_BACKWARD                    0X0003
+#define COMMAND_CAR_TURNLEFT                    0X0004
+#define COMMAND_CAR_TURNRIGHT                   0X0005
 
-// #define COMMAND_CAR_FORWARD_WITH_PARAM
+#define COMMAND_CAR_FORWARD_WITH_PARAM          0X1002
+#define COMMAND_CAR_BACKWARD_WITH_PARAM         0X1003
+#define COMMAND_CAR_TURNLEFT_WITH_PARAM         0X1004
+#define COMMAND_CAR_TURNRIGHT_WITH_PARAM        0X1005
 
-#define COMMAND_RC_VIBRATE              -1
+#define COMMAND_SET_PID                         0x3000
+#define COMMAND_RESET_PID                       0x4000
+#define COMMAND_REQUEST_PID                     0x5000
+
+// up-link
+#define COMMAND_RC_VIBRATE                      0x2000
+
+#define COMMAND_SEND_PID                        0x6000
+#define COMMAND_SEND_SENSOR                     0x6001
+#define COMMAND_SEND_RPY                        0x6002
+
+struct cmd_dt_pid
+{
+    int   id;
+    float kp;
+    float ki;
+    float kd;
+};
+
+struct cmd_dt_sensor
+{
+    int32_t acc_x;
+    int32_t acc_y;
+    int32_t acc_z;
+    int32_t gyro_x;
+    int32_t gyro_y;
+    int32_t gyro_z;
+    int32_t mag_x;
+    int32_t mag_y;
+    int32_t mag_z;
+};
+
+struct cmd_dt_rpy
+{
+    float roll;
+    float pitch;
+    float yaw;
+};
+
+struct command_sender
+{
+    char *name;
+    rt_err_t (*send)(rt_int16_t cmd, void *param, rt_uint16_t size);
+};
+
+typedef struct command_sender *command_sender_t;
 
 struct command_info
 {
-    void       *target;
-    rt_int16_t cmd;
-    void       *param;
+    rt_int16_t  cmd;
+    void        *target;
 };
 
 typedef struct command_info *command_info_t;
 
-rt_err_t command_register(rt_int16_t cmd, void (*handler)(command_info_t info));
+rt_err_t command_register(rt_int16_t cmd, void (*handler)(command_info_t info, void *param, rt_uint16_t size));
 rt_err_t command_unregister(rt_int16_t cmd);
-rt_err_t command_send(command_info_t info);
+rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, void *target);
+rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size);
 
 #endif
