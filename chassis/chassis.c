@@ -186,7 +186,27 @@ static void chassis_move_right(command_info_t info, void *param, rt_uint16_t siz
     }
 }
 
+// TODO
+
 static void chassis_forward_with_param(command_info_t info, void *param, rt_uint16_t size)
+{
+    if (info->target != RT_NULL)
+    {
+        if (size == sizeof(struct cmd_dt_velocity))
+        {
+            struct cmd_dt_velocity *velocity_info = (struct cmd_dt_velocity *)param;
+            if (velocity_info->data.linear_x < 0)
+            {
+                return;
+            }
+            chassis_straight(info->target, velocity_info->data.linear_x);
+        }
+    }
+}
+
+// TODO
+
+static void chassis_set_linear_x(command_info_t info, void *param, rt_uint16_t size)
 {
     if (info->target != RT_NULL)
     {
@@ -198,12 +218,57 @@ static void chassis_forward_with_param(command_info_t info, void *param, rt_uint
     }
 }
 
+static void chassis_set_pid(command_info_t info, void *param, rt_uint16_t size)
+{
+    if (info->target != RT_NULL)
+    {
+        if(size == sizeof(struct cmd_dt_pid))
+        {
+            chassis_t chas = (chassis_t)info->target;
+            struct cmd_dt_pid *pid_info = (struct cmd_dt_pid *)param;
+            struct controller_param parameter = {
+                .data.pid.kp = pid_info->kp,
+                .data.pid.ki = pid_info->ki,
+                .data.pid.kd = pid_info->kd
+            };
+            
+            switch (pid_info->id)
+            {
+            case PID_ID_WHEEL_0:
+                controller_set_param(chas->c_wheels[0]->w_controller, &parameter);
+                break;
+            case PID_ID_WHEEL_1:
+                controller_set_param(chas->c_wheels[1]->w_controller, &parameter);
+                break;
+            case PID_ID_WHEEL_2:
+                if (chas->c_kinematics->total_wheels > 2)
+                {
+                    controller_set_param(chas->c_wheels[2]->w_controller, &parameter);
+                }
+                break;
+            case PID_ID_WHEEL_3:
+                if (chas->c_kinematics->total_wheels > 3)
+                {
+                    controller_set_param(chas->c_wheels[3]->w_controller, &parameter);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
 static int chassis_command_register(void)
 {
     // TODO
     command_register(COMMAND_CAR_STOP, chassis_stop);
     
     command_register(COMMAND_CAR_FORWARD_WITH_PARAM, chassis_forward_with_param);
+
+    command_register(COMMAND_SET_CAR_VELOCITY_LINEAR_X, chassis_set_linear_x);
+
+    command_register(COMMAND_SET_PID, chassis_set_pid);
 
     return RT_EOK;
 }

@@ -31,6 +31,12 @@
 #define COMMAND_SEND_SENSOR                     0x6001
 #define COMMAND_SEND_RPY                        0x6002
 
+// PID ID
+#define PID_ID_WHEEL_0                          1
+#define PID_ID_WHEEL_1                          2
+#define PID_ID_WHEEL_2                          3
+#define PID_ID_WHEEL_3                          4
+
 struct cmd_dt_pid
 {
     int   id;       // range: 1 ~ max

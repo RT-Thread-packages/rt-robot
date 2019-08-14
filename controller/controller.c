@@ -89,3 +89,10 @@ rt_err_t controller_set_sample_time(controller_t controller, rt_uint16_t sample_
     controller->sample_time = sample_time;
     return RT_EOK;
 }
+
+rt_err_t controller_set_param(controller_t controller, controller_param_t param)
+{
+    RT_ASSERT(controller != RT_NULL);
+
+    return controller->set_param(controller, param);
+}
