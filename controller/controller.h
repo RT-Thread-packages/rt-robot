@@ -17,7 +17,7 @@ struct controller
 
 typedef struct controller *controller_t;
 
-controller_t    controller_create(rt_size_t size);
+controller_t    controller_create(rt_size_t size, rt_uint16_t sample_time);
 rt_err_t        controller_update(controller_t controller, float current_point);
 rt_err_t        controller_destroy(controller_t controller);
 rt_err_t        controller_enable(controller_t controller);

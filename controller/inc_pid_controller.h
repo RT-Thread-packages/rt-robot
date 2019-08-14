@@ -29,7 +29,7 @@ struct inc_pid_controller
     rt_tick_t last_time;
 };
 
-inc_pid_controller_t    inc_pid_controller_create(float kp, float ki, float kd);
+inc_pid_controller_t    inc_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time);
 rt_err_t                inc_pid_controller_set_kp(inc_pid_controller_t pid, float kp);
 rt_err_t                inc_pid_controller_set_ki(inc_pid_controller_t pid, float ki);
 rt_err_t                inc_pid_controller_set_kd(inc_pid_controller_t pid, float kd);

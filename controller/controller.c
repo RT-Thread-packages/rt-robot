@@ -6,7 +6,7 @@
 
 // single intput and single output system
 
-controller_t controller_create(rt_size_t size)
+controller_t controller_create(rt_size_t size, rt_uint16_t sample_time)
 {
     // TODO
     // Malloc memory and initialize PID
@@ -17,6 +17,7 @@ controller_t controller_create(rt_size_t size)
         return RT_NULL;
     }
 
+    new_controller->sample_time = sample_time;
     new_controller->enable = RT_FALSE;
 
     return new_controller;

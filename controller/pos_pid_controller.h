@@ -30,7 +30,7 @@ struct pos_pid_controller
     rt_tick_t last_time;
 };
 
-pos_pid_controller_t    pos_pid_controller_create(float kp, float ki, float kd);
+pos_pid_controller_t    pos_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time);
 rt_err_t                pos_pid_controller_set_kp(pos_pid_controller_t pid, float kp);
 rt_err_t                pos_pid_controller_set_ki(pos_pid_controller_t pid, float ki);
 rt_err_t                pos_pid_controller_set_kd(pos_pid_controller_t pid, float kd);

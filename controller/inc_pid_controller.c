@@ -60,9 +60,9 @@ static rt_err_t inc_pid_controller_update(void *pid, float current_point)
     return RT_EOK;
 }
 
-inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd)
+inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time)
 {
-    inc_pid_controller_t new_pid = (inc_pid_controller_t)controller_create(sizeof(struct inc_pid_controller));
+    inc_pid_controller_t new_pid = (inc_pid_controller_t)controller_create(sizeof(struct inc_pid_controller), sample_time);
     if(new_pid == RT_NULL)
     {
         return RT_NULL;

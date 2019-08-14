@@ -68,9 +68,9 @@ static rt_err_t pos_pid_controller_update(void *pid, float current_point)
     return RT_EOK;
 }
 
-pos_pid_controller_t pos_pid_controller_create(float kp, float ki, float kd)
+pos_pid_controller_t pos_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time)
 {
-    pos_pid_controller_t new_pid = (pos_pid_controller_t)controller_create(sizeof(struct pos_pid_controller));
+    pos_pid_controller_t new_pid = (pos_pid_controller_t)controller_create(sizeof(struct pos_pid_controller), sample_time);
     if(new_pid == RT_NULL)
     {
         return RT_NULL;
@@ -82,7 +82,7 @@ pos_pid_controller_t pos_pid_controller_create(float kp, float ki, float kd)
 
     new_pid->maximum = +1000;
     new_pid->minimum = -1000;
-    new_pid->anti_windup_value = 0.0f;
+    new_pid->anti_windup_value = new_pid->maximum*2.0f;
 
     new_pid->integral = 0.0f;
     new_pid->p_error = 0.0f;
