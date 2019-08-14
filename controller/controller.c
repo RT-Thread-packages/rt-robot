@@ -96,3 +96,11 @@ rt_err_t controller_set_param(controller_t controller, controller_param_t param)
 
     return controller->set_param(controller, param);
 }
+
+rt_err_t controller_get_param(controller_t controller, controller_param_t param)
+{
+    RT_ASSERT(controller != RT_NULL);
+
+    return controller->get_param(controller, param);
+}
+

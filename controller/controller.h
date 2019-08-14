@@ -31,6 +31,7 @@ struct controller
     rt_err_t        (*reset)(void *controller);
     rt_err_t        (*destroy)(void *controller);
     rt_err_t        (*set_param)(void *controller, controller_param_t param);
+    rt_err_t        (*get_param)(void *controller, controller_param_t param);
 };
 
 typedef struct controller *controller_t;
@@ -44,4 +45,6 @@ rt_err_t        controller_reset(controller_t controller);
 rt_err_t        controller_set_target(controller_t controller, rt_int16_t target);
 rt_err_t        controller_set_sample_time(controller_t controller, rt_uint16_t sample_time);
 rt_err_t        controller_set_param(controller_t controller, controller_param_t param);
+rt_err_t        controller_get_param(controller_t controller, controller_param_t param);
+
 #endif // __CONTROLLER_H__

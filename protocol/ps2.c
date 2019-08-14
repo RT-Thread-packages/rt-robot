@@ -182,7 +182,7 @@ static void ps2_thread_entry(void *param)
             {
                 if (table[i].standard_cmd != COMMAND_NONE)
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL, 0, RT_NULL);
+                    command_handle(table[i].standard_cmd, RT_NULL, 0, &ps2_sender, ps2_target);
                 }
             }
         }
@@ -210,7 +210,7 @@ static void ps2_thread_entry(void *param)
                     continue;
                 }
                 
-                command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), ps2_target);
+                command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), &ps2_sender, ps2_target);
             }
             if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
             {

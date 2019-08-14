@@ -27,6 +27,17 @@ static rt_err_t pos_pid_controller_set_param(void *pid, controller_param_t param
     return RT_EOK;
 }
 
+static rt_err_t pos_pid_controller_get_param(void *pid, controller_param_t param)
+{
+    pos_pid_controller_t pos_pid = (pos_pid_controller_t)pid;
+
+    param->data.pid.kp = pos_pid->kp;
+    param->data.pid.ki = pos_pid->ki;
+    param->data.pid.kd = pos_pid->kd;
+
+    return RT_EOK;
+}
+
 static rt_err_t pos_pid_controller_update(void *pid, float current_point)
 {
     pos_pid_controller_t pos_pid = (pos_pid_controller_t)pid;
@@ -109,6 +120,7 @@ pos_pid_controller_t pos_pid_controller_create(float kp, float ki, float kd, rt_
     new_pid->controller.destroy = pos_pid_controller_destroy;
     new_pid->controller.update = pos_pid_controller_update;
     new_pid->controller.set_param = pos_pid_controller_set_param;
+    new_pid->controller.get_param = pos_pid_controller_get_param;
 
     return new_pid;
 }

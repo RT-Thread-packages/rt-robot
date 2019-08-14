@@ -259,6 +259,24 @@ static void chassis_set_pid(command_info_t info, void *param, rt_uint16_t size)
     }
 }
 
+static void chassis_response_request_pid(command_info_t info, void *param, rt_uint16_t size)
+{
+    // TODO
+    if (info->target != RT_NULL)
+    {
+        chassis_t chas = (chassis_t)info->target;
+        struct controller_param parameter;
+        struct cmd_dt_pid pid_info;
+
+        controller_get_param(chas->c_wheels[0]->w_controller, &parameter);
+        pid_info.id = PID_ID_WHEEL_0;
+        pid_info.kp = parameter.data.pid.kp;
+        pid_info.ki = parameter.data.pid.ki;
+        pid_info.kd = parameter.data.pid.kd;
+        command_send(info->sender, COMMAND_SEND_PID, &pid_info, sizeof(struct cmd_dt_pid));
+    }
+}
+
 static int chassis_command_register(void)
 {
     // TODO
@@ -269,6 +287,8 @@ static int chassis_command_register(void)
     command_register(COMMAND_SET_CAR_VELOCITY_LINEAR_X, chassis_set_linear_x);
 
     command_register(COMMAND_SET_PID, chassis_set_pid);
+
+    command_register(COMMAND_REQUEST_PID, chassis_response_request_pid);
 
     return RT_EOK;
 }

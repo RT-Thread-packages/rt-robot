@@ -85,15 +85,16 @@ typedef struct command_sender *command_sender_t;
 
 struct command_info
 {
-    rt_int16_t  cmd;
-    void        *target;
+    rt_int16_t          cmd;
+    void                *target;
+    command_sender_t    sender;
 };
 
 typedef struct command_info *command_info_t;
 
 rt_err_t command_register(rt_int16_t cmd, void (*handler)(command_info_t info, void *param, rt_uint16_t size));
 rt_err_t command_unregister(rt_int16_t cmd);
-rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, void *target);
+rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, command_sender_t sender, void *target);
 rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size);
 
 #endif

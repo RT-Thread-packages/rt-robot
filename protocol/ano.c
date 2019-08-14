@@ -23,6 +23,73 @@ static rt_sem_t rx_sem = RT_NULL;
 // ABOUT COMMAND
 static void *ano_target;
 
+static rt_err_t ano_sender_send(rt_int16_t cmd, void *param, rt_uint16_t size)
+{
+    switch (cmd)
+    {
+    case COMMAND_SEND_PID:
+        if (size == 3 * sizeof(struct cmd_dt_pid))
+        {
+            struct cmd_dt_pid *pid_info = (struct cmd_dt_pid *)param;
+            int group = (int)((pid_info[0].id + pid_info[1].id + pid_info[2].id) / 9) + 1;
+
+            if (group > 6)
+            {
+                group = 6;
+            }
+            if (group < 1)
+            {
+                group = 1;
+            }
+            ano_send_pid(group, pid_info[0].kp, pid_info[0].ki, pid_info[0].kd,
+                pid_info[1].kp, pid_info[1].ki, pid_info[1].kd,
+                pid_info[2].kp, pid_info[2].ki, pid_info[2].kd);
+        }
+        else
+        {
+            LOG_D("You need send three groups pid paramter at once when use COMMAND_SEND_PID");
+            return RT_ERROR;
+        }
+        
+        break;
+    case COMMAND_SEND_SENSOR:
+        if (size == sizeof(struct cmd_dt_sensor))
+        {
+            struct cmd_dt_sensor *sensor_info = (struct cmd_dt_sensor *)param;
+            ano_send_senser(sensor_info->acc_x, sensor_info->acc_y, sensor_info->acc_z, 
+                sensor_info->gyro_x, sensor_info->gyro_y, sensor_info->gyro_z, 
+                sensor_info->mag_x, sensor_info->mag_y, sensor_info->mag_z, 0);
+        }
+        else
+        {
+            return RT_ERROR;
+        }
+        
+        break;
+    case COMMAND_SEND_RPY:
+        if (size == sizeof(struct cmd_dt_rpy))
+        {
+            struct cmd_dt_rpy *rpy_info = (struct cmd_dt_rpy *)param;
+            ano_send_status(rpy_info->roll, rpy_info->pitch, rpy_info->yaw, 0,0,0);
+        }
+        else
+        {
+            return RT_ERROR;
+        }
+        
+        break;
+    default:
+        break;
+    }
+
+    return RT_EOK;
+}
+
+static struct command_sender ano_sender = {
+    .name = "ano",
+    .send = ano_sender_send
+};
+
 static int _send_data(uint8_t *buffer, uint8_t length)
 {
     if (dev_ano != RT_NULL)
@@ -94,7 +161,7 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
     {
         if (*(buffer + 4) == 0X01)
         {
-            command_handle(COMMAND_REQUEST_PID, RT_NULL, 0, ano_target);
+            command_handle(COMMAND_REQUEST_PID, RT_NULL, 0, &ano_sender, ano_target);
         }
         else if (*(buffer + 4) == 0XA0)
         {
@@ -102,7 +169,7 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         }
         else if (*(buffer + 4) == 0XA1)
         {
-            command_handle(COMMAND_RESET_PID, RT_NULL, 0, ano_target);
+            command_handle(COMMAND_RESET_PID, RT_NULL, 0, &ano_sender, ano_target);
         }
     }
     else if (*(buffer + 2) == 0X10) //PID1
@@ -110,22 +177,22 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         struct cmd_dt_pid pid;
         float kpid[9];
         _get_pid_param(buffer, kpid);
-        
+
         pid.id = PID_ID_WHEEL_0;
         pid.kp = kpid[0];
         pid.ki = kpid[1];
         pid.kd = kpid[2];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
+        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
         pid.id = PID_ID_WHEEL_1;
         pid.kp = kpid[3];
         pid.ki = kpid[4];
         pid.kd = kpid[5];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
+        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
         pid.id = PID_ID_WHEEL_2;
         pid.kp = kpid[6];
         pid.ki = kpid[7];
         pid.kd = kpid[8];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
+        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
 
         ano_send_check(*(buffer + 2), sum);
     }
@@ -139,7 +206,7 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         pid.kp = kpid[0];
         pid.ki = kpid[1];
         pid.kd = kpid[2];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
+        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
         // pid.id = 5;
         // pid.kp = kpid[3];
         // pid.ki = kpid[4];
@@ -682,73 +749,6 @@ int ano_set_device(const char *device_name)
 
     return RT_EOK;
 }
-
-static rt_err_t ano_sender_send(rt_int16_t cmd, void *param, rt_uint16_t size)
-{
-    switch (cmd)
-    {
-    case COMMAND_SEND_PID:
-        if (size == 3 * sizeof(struct cmd_dt_pid))
-        {
-            struct cmd_dt_pid *pid_info = (struct cmd_dt_pid *)param;
-            int group = (int)((pid_info[0].id + pid_info[1].id + pid_info[2].id) / 9) + 1;
-
-            if (group > 6)
-            {
-                group = 6;
-            }
-            if (group < 1)
-            {
-                group = 1;
-            }
-            ano_send_pid(group, pid_info[0].kp, pid_info[0].ki, pid_info[0].kd,
-                pid_info[1].kp, pid_info[1].ki, pid_info[1].kd,
-                pid_info[2].kp, pid_info[2].ki, pid_info[2].kd);
-        }
-        else
-        {
-            LOG_D("You need send three groups pid paramter at once when use COMMAND_SEND_PID");
-            return RT_ERROR;
-        }
-        
-        break;
-    case COMMAND_SEND_SENSOR:
-        if (size == sizeof(struct cmd_dt_sensor))
-        {
-            struct cmd_dt_sensor *sensor_info = (struct cmd_dt_sensor *)param;
-            ano_send_senser(sensor_info->acc_x, sensor_info->acc_y, sensor_info->acc_z, 
-                sensor_info->gyro_x, sensor_info->gyro_y, sensor_info->gyro_z, 
-                sensor_info->mag_x, sensor_info->mag_y, sensor_info->mag_z, 0);
-        }
-        else
-        {
-            return RT_ERROR;
-        }
-        
-        break;
-    case COMMAND_SEND_RPY:
-        if (size == sizeof(struct cmd_dt_rpy))
-        {
-            struct cmd_dt_rpy *rpy_info = (struct cmd_dt_rpy *)param;
-            ano_send_status(rpy_info->roll, rpy_info->pitch, rpy_info->yaw, 0,0,0);
-        }
-        else
-        {
-            return RT_ERROR;
-        }
-        
-        break;
-    default:
-        break;
-    }
-
-    return RT_EOK;
-}
-
-static struct command_sender ano_sender = {
-    .name = "ano",
-    .send = ano_sender_send
-};
 
 command_sender_t ano_get_sender(void)
 {

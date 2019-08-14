@@ -62,12 +62,13 @@ rt_err_t command_unregister(rt_int16_t cmd)
     return RT_EOK;
 }
 
-rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, void *target)
+rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, command_sender_t sender, void *target)
 {
     struct command_msg msg = {
         .param = param,
         .size = size,
         .info = {
+            .sender = sender,
             .target = target,
             .cmd = cmd,
         }
