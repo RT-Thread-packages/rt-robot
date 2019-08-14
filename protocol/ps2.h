@@ -3,7 +3,7 @@
 
 #include <rtthread.h>
 #include <rtdevice.h>
-#include <command.h>
+#include "command.h"
 
 // COMMAND
 #define PS2_CMD_VIBRATE     1
@@ -50,5 +50,8 @@ struct ps2_ctrl_data
 void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin, void *target);
 int  ps2_scan(ps2_ctrl_data_t pt);
 int  ps2_read_light(void);
+
+command_sender_t ps2_get_sender(void);
+rt_err_t ps2_set_target(void *target);
 
 #endif

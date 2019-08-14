@@ -25,4 +25,8 @@ rt_err_t    chassis_set_rpm(chassis_t chas, rt_int16_t target_rpm[]);
 
 rt_err_t    chassis_update(chassis_t chas);
 
+rt_err_t    chassis_straight(chassis_t chas, float linear_x);
+rt_err_t    chassis_move(chassis_t chas, float linear_y);
+rt_err_t    chassis_rotate(chassis_t chas, float angular_z);
+
 #endif

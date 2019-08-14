@@ -16,6 +16,9 @@
 #define COMMAND_CAR_BACKWARD_WITH_PARAM         0X1003
 #define COMMAND_CAR_TURNLEFT_WITH_PARAM         0X1004
 #define COMMAND_CAR_TURNRIGHT_WITH_PARAM        0X1005
+#define COMMAND_SET_CAR_VELOCITY_LINEAR_X       0x1006
+#define COMMAND_SET_CAR_VELOCITY_LINEAR_Y       0x1007
+#define COMMAND_SET_CAR_VELOCITY_ANGULAR_Z      0x1008
 
 #define COMMAND_SET_PID                         0x3000
 #define COMMAND_RESET_PID                       0x4000
@@ -30,7 +33,7 @@
 
 struct cmd_dt_pid
 {
-    int   id;
+    int   id;       // range: 1 ~ max
     float kp;
     float ki;
     float kd;
@@ -54,6 +57,16 @@ struct cmd_dt_rpy
     float roll;
     float pitch;
     float yaw;
+};
+
+struct cmd_dt_velocity
+{
+    union
+    {
+        float linear_x;     // m/s
+        float linear_y;
+        float angular_z;
+    } data; 
 };
 
 struct command_sender

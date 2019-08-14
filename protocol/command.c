@@ -8,7 +8,7 @@
 #define THREAD_PRIORITY             ((RT_THREAD_PRIORITY_MAX / 3) + 1)
 #define THREAD_STACK_SIZE           512
 #define THREAD_TIMESLICE            10
-static rt_thread_t trd_cmd = RT_NULL;
+static rt_thread_t cmd_tid = RT_NULL;
 
 // Message Queue
 struct command_msg
@@ -17,8 +17,8 @@ struct command_msg
     void                *param;
     rt_uint16_t         size;
 };
-#define MAX_MSGS                    16
-static rt_mq_t msg_cmd = RT_NULL;
+#define MAX_MSGS                    32
+static rt_mq_t cmd_mq = RT_NULL;
 
 // Table
 #define TABLE_MAX_SIZE              32
@@ -72,7 +72,7 @@ rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, void *tar
             .cmd = cmd,
         }
     };
-    return rt_mq_send(msg_cmd, &msg, sizeof(struct command_msg));
+    return rt_mq_send(cmd_mq, &msg, sizeof(struct command_msg));
 }
 
 rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size)
@@ -82,7 +82,7 @@ rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_u
         return sender->send(cmd, param, size);
     }
 
-    return RT_EOK;
+    return RT_ERROR;
 }
 
 static void command_thread_entry(void *param)
@@ -91,7 +91,7 @@ static void command_thread_entry(void *param)
 
     while (1)
     {
-        rt_mq_recv(msg_cmd, &msg, sizeof(struct command_msg), RT_WAITING_FOREVER);
+        rt_mq_recv(cmd_mq, &msg, sizeof(struct command_msg), RT_WAITING_FOREVER);
         // look-up table and call callback
         for (int i = 0; i < command_table_size; i++)
         {
@@ -106,22 +106,22 @@ static void command_thread_entry(void *param)
 
 void command_init(void)
 {
-    msg_cmd = rt_mq_create("command", sizeof(struct command_info), MAX_MSGS, RT_IPC_FLAG_FIFO);
-    if (msg_cmd == RT_NULL)
+    cmd_mq = rt_mq_create("command", sizeof(struct command_info), MAX_MSGS, RT_IPC_FLAG_FIFO);
+    if (cmd_mq == RT_NULL)
     {
         LOG_E("Failed to creat meassage queue");
         return;
     }
 
-    trd_cmd = rt_thread_create("command",
+    cmd_tid = rt_thread_create("command",
                               command_thread_entry, RT_NULL,
                               THREAD_STACK_SIZE,
                               THREAD_PRIORITY, THREAD_TIMESLICE);
 
-    if (trd_cmd == RT_NULL)
+    if (cmd_tid == RT_NULL)
     {
         LOG_E("Failed to creat thread");
         return;
     }
-    rt_thread_startup(trd_cmd);
+    rt_thread_startup(cmd_tid);
 }

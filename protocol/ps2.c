@@ -17,6 +17,8 @@ Change From YFRobot. www.yfrobot.com
 
 #define KEEP_TIME()                 _delay_us(16);
 
+#define DEFAULT_TARGET_MAX_SPEED    1.0f
+
 static uint8_t light_mode = PS2_NO_MODE;
 static rt_thread_t tid_ps2 = RT_NULL;
 static struct ps2_table table[PS2_TABLE_SIZE] = PS2_DEFAULT_TABLE;
@@ -25,6 +27,8 @@ static rt_base_t ps2_cs_pin;
 static rt_base_t ps2_clk_pin;
 static rt_base_t ps2_do_pin; 
 static rt_base_t ps2_di_pin;
+
+static void *ps2_target;
 
 static void hal_cs_high(void)
 {
@@ -137,9 +141,36 @@ int ps2_read_light(void)
     return light_mode;
 }
 
+static rt_err_t ps2_sender_send(rt_int16_t cmd, void *param, rt_uint16_t size)
+{
+    if (cmd == COMMAND_RC_VIBRATE)
+    {
+        // TODO
+    }
+
+    return RT_EOK;
+}
+
+static struct command_sender ps2_sender = {
+    .name = "ano",
+    .send = ps2_sender_send
+};
+
+command_sender_t ps2_get_sender(void)
+{
+    return &ps2_sender;
+}
+
+rt_err_t ps2_set_target(void *target)
+{
+    ps2_target = ps2_target;
+}
+
 static void ps2_thread_entry(void *param)
 {
     struct ps2_ctrl_data ctrl_data;
+    struct cmd_dt_velocity target_velocity;
+
     while (1)
     {
         rt_thread_mdelay(THREAD_DELAY_TIME);   
@@ -161,9 +192,25 @@ static void ps2_thread_entry(void *param)
         {
             if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
             {
-                // cmd_info.cmd = table[PS2_ROCKER_LX].standard_cmd;
-                // cmd_info.param = &ctrl_data.left_stick_x;
-                // command_handle(&cmd_info);
+                float tmp = DEFAULT_TARGET_MAX_SPEED * (ctrl_data.left_stick_x - 0x80) / 128;
+                if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_X)
+                {
+                    target_velocity.data.linear_x = tmp;
+                }
+                else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_Y)
+                {
+                    target_velocity.data.linear_y = tmp;
+                }
+                else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_ANGULAR_Z)
+                {
+                    target_velocity.data.angular_z = tmp;
+                }
+                else
+                {
+                    continue;
+                }
+                
+                command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), ps2_target);
             }
             if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
             {
