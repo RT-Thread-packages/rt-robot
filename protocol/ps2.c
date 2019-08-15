@@ -28,8 +28,6 @@ static rt_base_t ps2_clk_pin;
 static rt_base_t ps2_do_pin; 
 static rt_base_t ps2_di_pin;
 
-static void *ps2_target;
-
 static void hal_cs_high(void)
 {
     rt_pin_write(ps2_cs_pin, PIN_HIGH);
@@ -161,15 +159,10 @@ command_sender_t ps2_get_sender(void)
     return &ps2_sender;
 }
 
-rt_err_t ps2_set_target(void *target)
-{
-    ps2_target = ps2_target;
-}
-
 static void ps2_thread_entry(void *param)
 {
     struct ps2_ctrl_data ctrl_data;
-    struct cmd_dt_velocity target_velocity;
+    struct cmd_velocity target_velocity;
 
     while (1)
     {
@@ -182,7 +175,7 @@ static void ps2_thread_entry(void *param)
             {
                 if (table[i].standard_cmd != COMMAND_NONE)
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL, 0, ps2_target);
+                    command_handle(table[i].standard_cmd, RT_NULL, 0);
                 }
             }
         }
@@ -212,7 +205,7 @@ static void ps2_thread_entry(void *param)
                 //     continue;
                 // }
                 
-                // command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), &ps2_sender, ps2_target);
+                // command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_velocity), &ps2_sender, ps2_target);
             }
             if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
             {
@@ -236,7 +229,7 @@ static void ps2_thread_entry(void *param)
     }
 }
 
-void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin, void *target)
+void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin)
 {
     ps2_cs_pin = cs_pin;
     ps2_clk_pin = clk_pin;

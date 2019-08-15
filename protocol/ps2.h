@@ -47,7 +47,7 @@ struct ps2_ctrl_data
     uint8_t right_stick_y;
 };
 
-void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin, void *target);
+void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin);
 int  ps2_scan(ps2_ctrl_data_t pt);
 int  ps2_read_light(void);
 

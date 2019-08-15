@@ -9,15 +9,20 @@
 #define COMMAND_SET_CHASSIS_STOP                        (rt_uint16_t)(0X0001)
 #define COMMAND_SET_CHASSIS_FORWARD                     (rt_uint16_t)(0X0002)
 #define COMMAND_SET_CHASSIS_BACKWARD                    (rt_uint16_t)(0X0003)
-#define COMMAND_SET_CHASSIS_TURNLEFT                    (rt_uint16_t)(0X0004)
-#define COMMAND_SET_CHASSIS_TURNRIGHT                   (rt_uint16_t)(0X0005)
+#define COMMAND_SET_CHASSIS_ROTATE_LEFT                 (rt_uint16_t)(0X0004)
+#define COMMAND_SET_CHASSIS_ROTATE_RIGHT                (rt_uint16_t)(0X0005)
+#define COMMAND_SET_CHASSIS_MOVE_LEFT                   (rt_uint16_t)(0X0006)
+#define COMMAND_SET_CHASSIS_MOVE_RIGHT                  (rt_uint16_t)(0X0007)
+
 #define COMMAND_SET_CHASSIS_FORWARD_WITH_PARAM          (rt_uint16_t)(0X1002)
 #define COMMAND_SET_CHASSIS_BACKWARD_WITH_PARAM         (rt_uint16_t)(0X1003)
-#define COMMAND_SET_CHASSIS_TURNLEFT_WITH_PARAM         (rt_uint16_t)(0X1004)
-#define COMMAND_SET_CHASSIS_TURNRIGHT_WITH_PARAM        (rt_uint16_t)(0X1005)
-#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_X           (rt_uint16_t)(0x1006)
-#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_Y           (rt_uint16_t)(0x1007)
-#define COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z          (rt_uint16_t)(0x1008)
+#define COMMAND_SET_CHASSIS_ROTATE_LEFT_WITH_PARAM      (rt_uint16_t)(0X1004)
+#define COMMAND_SET_CHASSIS_ROTATE_RIGHT_WITH_PARAM     (rt_uint16_t)(0X1005)
+#define COMMAND_SET_CHASSIS_MOVE_LEFT_WITH_PARAM        (rt_uint16_t)(0X1006)
+#define COMMAND_SET_CHASSIS_MOVE_RIGHT_WITH_PARAM       (rt_uint16_t)(0X1007)
+#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_X           (rt_uint16_t)(0x1008)
+#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_Y           (rt_uint16_t)(0x1009)
+#define COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z          (rt_uint16_t)(0x100A)
 
 #define COMMAND_SET_WHEEL0_PID                          (rt_uint16_t)(0x2000)
 #define COMMAND_SET_WHEEL1_PID                          (rt_uint16_t)(0x2001)
@@ -47,7 +52,7 @@
 #define PID_ID_WHEEL_2                          3
 #define PID_ID_WHEEL_3                          4
 
-struct cmd_dt_pid
+struct cmd_pid
 {
     int   id;       // range: 1 ~ max
     float kp;
@@ -55,7 +60,7 @@ struct cmd_dt_pid
     float kd;
 };
 
-struct cmd_dt_sensor
+struct cmd_sensor
 {
     int32_t acc_x;
     int32_t acc_y;
@@ -68,14 +73,14 @@ struct cmd_dt_sensor
     int32_t mag_z;
 };
 
-struct cmd_dt_rpy
+struct cmd_rpy
 {
     float roll;
     float pitch;
     float yaw;
 };
 
-struct cmd_dt_velocity
+struct cmd_velocity
 {
     union
     {
@@ -93,7 +98,7 @@ struct command_sender
 
 typedef struct command_sender *command_sender_t;
 
-rt_err_t command_handle(rt_uint16_t cmd, void *param, rt_uint16_t size, void *target);
+rt_err_t command_handle(rt_uint16_t cmd, void *param, rt_uint16_t size);
 rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size);
 
 #endif

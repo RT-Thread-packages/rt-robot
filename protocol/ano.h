@@ -13,9 +13,8 @@ int ano_send_motorpwm(uint16_t m_1, uint16_t m_2, uint16_t m_3, uint16_t m_4, ui
 int ano_send_pid(uint8_t group, float k1_p, float k1_i, float k1_d, float k2_p, float k2_i, float k2_d, float k3_p, float k3_i, float k3_d);
 int ano_send_user_data(uint8_t number, float d0, float d1, float d2, float d3, float d4, float d5, int16_t d6, int16_t d7, int16_t d8);
 int ano_set_device(const char *device_name);
-int ano_init(void *param, void *target);
+int ano_init(void *param);
 
 command_sender_t ano_get_sender(void);
-rt_err_t ano_set_target(void *target);
 
 #endif
