@@ -141,7 +141,7 @@ int ps2_read_light(void)
     return light_mode;
 }
 
-static rt_err_t ps2_sender_send(rt_int16_t cmd, void *param, rt_uint16_t size)
+static rt_err_t ps2_sender_send(rt_uint16_t cmd, void *param, rt_uint16_t size)
 {
     if (cmd == COMMAND_RC_VIBRATE)
     {
@@ -182,7 +182,7 @@ static void ps2_thread_entry(void *param)
             {
                 if (table[i].standard_cmd != COMMAND_NONE)
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL, 0, &ps2_sender, ps2_target);
+                    command_handle(table[i].standard_cmd, RT_NULL, 0, ps2_target);
                 }
             }
         }
@@ -190,27 +190,29 @@ static void ps2_thread_entry(void *param)
         // rocker
         if (ps2_read_light() == PS2_RED_MODE)
         {
+            // TODO
+
             if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
             {
-                float tmp = DEFAULT_TARGET_MAX_SPEED * (ctrl_data.left_stick_x - 0x80) / 128;
-                if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_X)
-                {
-                    target_velocity.data.linear_x = tmp;
-                }
-                else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_Y)
-                {
-                    target_velocity.data.linear_y = tmp;
-                }
-                else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_ANGULAR_Z)
-                {
-                    target_velocity.data.angular_z = tmp;
-                }
-                else
-                {
-                    continue;
-                }
+                // float tmp = DEFAULT_TARGET_MAX_SPEED * (ctrl_data.left_stick_x - 0x80) / 128;
+                // if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_X)
+                // {
+                //     target_velocity.data.linear_x = tmp;
+                // }
+                // else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_Y)
+                // {
+                //     target_velocity.data.linear_y = tmp;
+                // }
+                // else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_ANGULAR_Z)
+                // {
+                //     target_velocity.data.angular_z = tmp;
+                // }
+                // else
+                // {
+                //     continue;
+                // }
                 
-                command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), &ps2_sender, ps2_target);
+                // command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_dt_velocity), &ps2_sender, ps2_target);
             }
             if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
             {

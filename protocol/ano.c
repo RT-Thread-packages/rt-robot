@@ -23,7 +23,7 @@ static rt_sem_t rx_sem = RT_NULL;
 // ABOUT COMMAND
 static void *ano_target;
 
-static rt_err_t ano_sender_send(rt_int16_t cmd, void *param, rt_uint16_t size)
+static rt_err_t ano_sender_send(rt_uint16_t cmd, void *param, rt_uint16_t size)
 {
     switch (cmd)
     {
@@ -161,7 +161,17 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
     {
         if (*(buffer + 4) == 0X01)
         {
-            command_handle(COMMAND_REQUEST_PID, RT_NULL, 0, &ano_sender, ano_target);
+            struct cmd_dt_pid pid[4];
+            if (RT_EOK == command_handle(COMMAND_GET_WHEELS_PID, pid, 4*sizeof(struct cmd_dt_pid), ano_target))
+            {
+                ano_send_pid(1, 
+                    pid[0].kp, pid[0].ki, pid[0].kd,
+                    pid[1].kp, pid[1].ki, pid[1].kd,
+                    pid[2].kp, pid[2].ki, pid[2].kd);
+                ano_send_pid(2, 
+                    pid[3].kp, pid[3].ki, pid[3].kd,
+                    0.0f,0.0f,0.0f,0.0f,0.0f,0.0f);
+            }
         }
         else if (*(buffer + 4) == 0XA0)
         {
@@ -169,7 +179,7 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         }
         else if (*(buffer + 4) == 0XA1)
         {
-            command_handle(COMMAND_RESET_PID, RT_NULL, 0, &ano_sender, ano_target);
+            command_handle(COMMAND_SET_DEFAULT_PID, RT_NULL, 0, ano_target);
         }
     }
     else if (*(buffer + 2) == 0X10) //PID1
@@ -182,17 +192,17 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         pid.kp = kpid[0];
         pid.ki = kpid[1];
         pid.kd = kpid[2];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
+        command_handle(COMMAND_SET_WHEEL0_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
         pid.id = PID_ID_WHEEL_1;
         pid.kp = kpid[3];
         pid.ki = kpid[4];
         pid.kd = kpid[5];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
+        command_handle(COMMAND_SET_WHEEL1_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
         pid.id = PID_ID_WHEEL_2;
         pid.kp = kpid[6];
         pid.ki = kpid[7];
         pid.kd = kpid[8];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
+        command_handle(COMMAND_SET_WHEEL2_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
 
         ano_send_check(*(buffer + 2), sum);
     }
@@ -206,7 +216,7 @@ static void ano_parse_frame(uint8_t *buffer, uint8_t length)
         pid.kp = kpid[0];
         pid.ki = kpid[1];
         pid.kd = kpid[2];
-        command_handle(COMMAND_SET_PID, &pid, sizeof(struct cmd_dt_pid), &ano_sender, ano_target);
+        command_handle(COMMAND_SET_WHEEL3_PID, &pid, sizeof(struct cmd_dt_pid), ano_target);
         // pid.id = 5;
         // pid.kp = kpid[3];
         // pid.ki = kpid[4];

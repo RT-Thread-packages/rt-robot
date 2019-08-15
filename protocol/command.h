@@ -5,31 +5,41 @@
 
 /* Command */
 // down-link
-#define COMMAND_NONE                            0X0000
-#define COMMAND_CAR_STOP                        0X0001
-#define COMMAND_CAR_FORWARD                     0X0002
-#define COMMAND_CAR_BACKWARD                    0X0003
-#define COMMAND_CAR_TURNLEFT                    0X0004
-#define COMMAND_CAR_TURNRIGHT                   0X0005
+#define COMMAND_NONE                                    (rt_uint16_t)(0X0000)
+#define COMMAND_SET_CHASSIS_STOP                        (rt_uint16_t)(0X0001)
+#define COMMAND_SET_CHASSIS_FORWARD                     (rt_uint16_t)(0X0002)
+#define COMMAND_SET_CHASSIS_BACKWARD                    (rt_uint16_t)(0X0003)
+#define COMMAND_SET_CHASSIS_TURNLEFT                    (rt_uint16_t)(0X0004)
+#define COMMAND_SET_CHASSIS_TURNRIGHT                   (rt_uint16_t)(0X0005)
+#define COMMAND_SET_CHASSIS_FORWARD_WITH_PARAM          (rt_uint16_t)(0X1002)
+#define COMMAND_SET_CHASSIS_BACKWARD_WITH_PARAM         (rt_uint16_t)(0X1003)
+#define COMMAND_SET_CHASSIS_TURNLEFT_WITH_PARAM         (rt_uint16_t)(0X1004)
+#define COMMAND_SET_CHASSIS_TURNRIGHT_WITH_PARAM        (rt_uint16_t)(0X1005)
+#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_X           (rt_uint16_t)(0x1006)
+#define COMMAND_SET_CHASSIS_VELOCITY_LINEAR_Y           (rt_uint16_t)(0x1007)
+#define COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z          (rt_uint16_t)(0x1008)
 
-#define COMMAND_CAR_FORWARD_WITH_PARAM          0X1002
-#define COMMAND_CAR_BACKWARD_WITH_PARAM         0X1003
-#define COMMAND_CAR_TURNLEFT_WITH_PARAM         0X1004
-#define COMMAND_CAR_TURNRIGHT_WITH_PARAM        0X1005
-#define COMMAND_SET_CAR_VELOCITY_LINEAR_X       0x1006
-#define COMMAND_SET_CAR_VELOCITY_LINEAR_Y       0x1007
-#define COMMAND_SET_CAR_VELOCITY_ANGULAR_Z      0x1008
+#define COMMAND_SET_WHEEL0_PID                          (rt_uint16_t)(0x2000)
+#define COMMAND_SET_WHEEL1_PID                          (rt_uint16_t)(0x2001)
+#define COMMAND_SET_WHEEL2_PID                          (rt_uint16_t)(0x2002)
+#define COMMAND_SET_WHEEL3_PID                          (rt_uint16_t)(0x2003)
+#define COMMAND_SET_WHEELS_PID                          (rt_uint16_t)(0x2004)
+#define COMMAND_SET_DEFAULT_PID                         (rt_uint16_t)(0x3000)
 
-#define COMMAND_SET_PID                         0x3000
-#define COMMAND_RESET_PID                       0x4000
-#define COMMAND_REQUEST_PID                     0x5000
+// ! Must keep all COMMAND_GET_XXX value is between COMMAND_GET_START and COMMAND_GET_END
+#define COMMAND_GET_START                               (rt_uint16_t)(0x5000)
+#define COMMAND_GET_WHEEL0_PID                          (rt_uint16_t)(0x5001)
+#define COMMAND_GET_WHEEL1_PID                          (rt_uint16_t)(0x5002)
+#define COMMAND_GET_WHEEL2_PID                          (rt_uint16_t)(0x5003)
+#define COMMAND_GET_WHEEL3_PID                          (rt_uint16_t)(0x5004)
+#define COMMAND_GET_WHEELS_PID                          (rt_uint16_t)(0x5005)
+#define COMMAND_GET_END                                 (rt_uint16_t)(0x8FFF)
 
 // up-link
-#define COMMAND_RC_VIBRATE                      0x2000
-
-#define COMMAND_SEND_PID                        0x6000
-#define COMMAND_SEND_SENSOR                     0x6001
-#define COMMAND_SEND_RPY                        0x6002
+#define COMMAND_RC_VIBRATE                              (rt_uint16_t)(0x9000)
+#define COMMAND_SEND_PID                                (rt_uint16_t)(0xA000)
+#define COMMAND_SEND_SENSOR                             (rt_uint16_t)(0xA001)
+#define COMMAND_SEND_RPY                                (rt_uint16_t)(0xA002)
 
 // PID ID
 #define PID_ID_WHEEL_0                          1
@@ -78,23 +88,12 @@ struct cmd_dt_velocity
 struct command_sender
 {
     char *name;
-    rt_err_t (*send)(rt_int16_t cmd, void *param, rt_uint16_t size);
+    rt_err_t (*send)(rt_uint16_t cmd, void *param, rt_uint16_t size);
 };
 
 typedef struct command_sender *command_sender_t;
 
-struct command_info
-{
-    rt_int16_t          cmd;
-    void                *target;
-    command_sender_t    sender;
-};
-
-typedef struct command_info *command_info_t;
-
-rt_err_t command_register(rt_int16_t cmd, void (*handler)(command_info_t info, void *param, rt_uint16_t size));
-rt_err_t command_unregister(rt_int16_t cmd);
-rt_err_t command_handle(rt_int16_t cmd, void *param, rt_uint16_t size, command_sender_t sender, void *target);
+rt_err_t command_handle(rt_uint16_t cmd, void *param, rt_uint16_t size, void *target);
 rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size);
 
 #endif
