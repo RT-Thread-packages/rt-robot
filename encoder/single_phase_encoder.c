@@ -14,13 +14,10 @@ static void encoder_isr(void *args)
 {
     rt_int32_t* pulse_count = (rt_int32_t*)args;
     (*pulse_count)++;
-    // LOG_D("Count %d", *pulse_count);
 }
 
 static rt_err_t single_phase_encoder_enable(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     single_phase_encoder_t enc_sub = (single_phase_encoder_t)enc;
 
     // Attach interrupts
@@ -33,8 +30,6 @@ static rt_err_t single_phase_encoder_enable(void *enc)
 
 static rt_err_t single_phase_encoder_disable(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     single_phase_encoder_t enc_sub = (single_phase_encoder_t)enc;
 
     return rt_pin_irq_enable(enc_sub->pin, PIN_IRQ_DISABLE);;
@@ -42,8 +37,6 @@ static rt_err_t single_phase_encoder_disable(void *enc)
 
 static rt_err_t single_phase_encoder_destroy(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     single_phase_encoder_disable(enc);
     single_phase_encoder_t enc_sub = (single_phase_encoder_t)enc;
     rt_pin_detach_irq(enc_sub->pin);
@@ -53,10 +46,10 @@ static rt_err_t single_phase_encoder_destroy(void *enc)
     return RT_EOK;
 }
 
-single_phase_encoder_t single_phase_encoder_create(rt_base_t pin,rt_uint16_t pulse_revol)
+single_phase_encoder_t single_phase_encoder_create(rt_base_t pin, rt_uint16_t pulse_revol, rt_uint16_t sample_time)
 {
     // Malloc memory and initialize pulse_count and pin
-    single_phase_encoder_t new_encoder = (single_phase_encoder_t)encoder_create(sizeof(struct single_phase_encoder));
+    single_phase_encoder_t new_encoder = (single_phase_encoder_t)encoder_create(sizeof(struct single_phase_encoder), sample_time);
     if(new_encoder == RT_NULL)
     {
         return RT_NULL;

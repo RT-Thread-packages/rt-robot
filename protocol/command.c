@@ -1,5 +1,4 @@
 #include <command.h>
-#include <chassis.h>
 
 #define DBG_SECTION_NAME  "command"
 #define DBG_LEVEL         DBG_LOG
@@ -100,7 +99,7 @@ rt_err_t command_handle(rt_uint16_t cmd, void *param, rt_uint16_t size)
     return rt_mq_send(cmd_mq, &msg, sizeof(struct command_msg));
 }
 
-rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size)
+rt_err_t command_send(command_sender_t sender, rt_uint16_t cmd, void *param, rt_uint16_t size)
 {
     if (sender->send != RT_NULL)
     {
@@ -118,7 +117,12 @@ static void command_thread_entry(void *param)
     {
         rt_mq_recv(cmd_mq, &msg, sizeof(struct command_msg), RT_WAITING_FOREVER);
 
-        // TODO
+        if (g_chas == RT_NULL)
+        {
+            LOG_D("The target is NULL");
+            continue;
+        }
+
         switch (msg.info.cmd)
         {
         case COMMAND_SET_WHEELS_PID:
@@ -163,16 +167,16 @@ static void command_thread_entry(void *param)
             chassis_straight(g_chas, -CHASSIS_VELOCITY_LINEAR_MAXIMUM / 2.0f);
             break;
         case COMMAND_SET_CHASSIS_ROTATE_LEFT:
-            chassis_rotate(g_chas, CHASSIS_VELOCITY_LINEAR_MAXIMUM / 2.0f);
+            chassis_rotate(g_chas, CHASSIS_VELOCITY_ANGULAR_MAXIMUM / 2.0f);
             break;
         case COMMAND_SET_CHASSIS_ROTATE_RIGHT:
-            chassis_rotate(g_chas, -CHASSIS_VELOCITY_LINEAR_MAXIMUM / 2.0f);
+            chassis_rotate(g_chas, -CHASSIS_VELOCITY_ANGULAR_MAXIMUM / 2.0f);
             break;
         case COMMAND_SET_CHASSIS_MOVE_LEFT:
-            chassis_move(g_chas, CHASSIS_VELOCITY_ANGULAR_MAXIMUM / 3.0f);
+            chassis_move(g_chas, CHASSIS_VELOCITY_LINEAR_MAXIMUM / 2.0f);
             break;
         case COMMAND_SET_CHASSIS_MOVE_RIGHT:
-            chassis_move(g_chas, -CHASSIS_VELOCITY_ANGULAR_MAXIMUM / 3.0f);
+            chassis_move(g_chas, -CHASSIS_VELOCITY_LINEAR_MAXIMUM / 2.0f);
             break;
         case COMMAND_SET_CHASSIS_FORWARD_WITH_PARAM:
         case COMMAND_SET_CHASSIS_BACKWARD_WITH_PARAM:
@@ -219,19 +223,46 @@ static void command_thread_entry(void *param)
                 p_fun(g_chas, tmp);
             }
             break;
+        case COMMAND_SET_CHASSIS_VELOCITY_LINEAR_X:
+        case COMMAND_SET_CHASSIS_VELOCITY_LINEAR_Y:
+        case COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z:
+            if (msg.size == sizeof(struct cmd_velocity))
+            {
+                struct cmd_velocity *target_velocity = (struct cmd_velocity *)msg.param;
+                rt_err_t (*p_fun)(chassis_t chas, float data);
+                float tmp;
+                if (msg.info.cmd == COMMAND_SET_CHASSIS_VELOCITY_LINEAR_X)
+                {
+                    tmp = target_velocity->data.linear_x;
+                    p_fun = chassis_set_velocity_x;
+                }
+                else if (msg.info.cmd == COMMAND_SET_CHASSIS_VELOCITY_LINEAR_Y)
+                {
+                    tmp = target_velocity->data.linear_y;
+                    p_fun = chassis_set_velocity_y;
+                }
+                else
+                {
+                    tmp = target_velocity->data.angular_z;
+                    p_fun = chassis_set_velocity_z;
+                }
+
+                p_fun(g_chas, tmp);
+            }
+            break;
         default:
             break;
         }
     }
 }
 
-void command_init(chassis_t chas)
+rt_err_t command_init(chassis_t chas)
 {
-    cmd_mq = rt_mq_create("command", sizeof(struct command_info), MAX_MSGS, RT_IPC_FLAG_FIFO);
+    cmd_mq = rt_mq_create("command", sizeof(struct command_msg), MAX_MSGS, RT_IPC_FLAG_FIFO);
     if (cmd_mq == RT_NULL)
     {
         LOG_E("Failed to creat meassage queue");
-        return;
+        return RT_ERROR;
     }
 
     cmd_tid = rt_thread_create("command",
@@ -242,10 +273,12 @@ void command_init(chassis_t chas)
     if (cmd_tid == RT_NULL)
     {
         LOG_E("Failed to creat thread");
-        return;
+        return RT_ERROR;
     }
 
     g_chas = chas;
 
     rt_thread_startup(cmd_tid);
+
+    return RT_EOK;
 }

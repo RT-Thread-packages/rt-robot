@@ -6,6 +6,6 @@
 struct single_phase_encoder;
 typedef struct single_phase_encoder *single_phase_encoder_t;
 
-single_phase_encoder_t single_phase_encoder_create(rt_base_t pin, rt_uint16_t pulse_revol);
+single_phase_encoder_t single_phase_encoder_create(rt_base_t pin, rt_uint16_t pulse_revol, rt_uint16_t sample_time);
 
 #endif // __SINGLE_PHASE_ENCODER_H__

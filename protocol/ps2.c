@@ -11,13 +11,11 @@ Change From YFRobot. www.yfrobot.com
 
 #define THREAD_DELAY_TIME           30
 
-#define THREAD_PRIORITY             ((RT_THREAD_PRIORITY_MAX / 3) + 2)
+#define THREAD_PRIORITY             ((RT_THREAD_PRIORITY_MAX / 3) + 3)
 #define THREAD_STACK_SIZE           1024
 #define THREAD_TIMESLICE            10
 
 #define KEEP_TIME()                 _delay_us(16);
-
-#define DEFAULT_TARGET_MAX_SPEED    1.0f
 
 static uint8_t light_mode = PS2_NO_MODE;
 static rt_thread_t tid_ps2 = RT_NULL;
@@ -111,7 +109,7 @@ int ps2_scan(ps2_ctrl_data_t pt)
     temp[4] = 0;
 
     transfer(temp, temp, 9);
-    
+
     pt->button = temp[3] | (temp[4] << 8);
     pt->right_stick_x = temp[5];
     pt->right_stick_y = temp[6];
@@ -141,9 +139,15 @@ int ps2_read_light(void)
 
 static rt_err_t ps2_sender_send(rt_uint16_t cmd, void *param, rt_uint16_t size)
 {
+    // TODO
+
     if (cmd == COMMAND_RC_VIBRATE)
     {
-        // TODO
+
+    }
+    else
+    {
+        return RT_ERROR;
     }
 
     return RT_EOK;
@@ -183,47 +187,31 @@ static void ps2_thread_entry(void *param)
         // rocker
         if (ps2_read_light() == PS2_RED_MODE)
         {
-            // TODO
+            uint8_t value[4] = {
+                ctrl_data.left_stick_x, 
+                ctrl_data.right_stick_x,
+                ctrl_data.left_stick_y,
+                ctrl_data.right_stick_y};
 
-            if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
+            rt_int16_t cmd[4] = {
+                table[PS2_ROCKER_LX].standard_cmd,
+                table[PS2_ROCKER_LY].standard_cmd,
+                table[PS2_ROCKER_RX].standard_cmd,
+                table[PS2_ROCKER_RY].standard_cmd};
+
+            for (int i = 0; i < 4; i++)
             {
-                // float tmp = DEFAULT_TARGET_MAX_SPEED * (ctrl_data.left_stick_x - 0x80) / 128;
-                // if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_X)
-                // {
-                //     target_velocity.data.linear_x = tmp;
-                // }
-                // else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_LINEAR_Y)
-                // {
-                //     target_velocity.data.linear_y = tmp;
-                // }
-                // else if (table[PS2_ROCKER_LX].standard_cmd == COMMAND_SET_CAR_VELOCITY_ANGULAR_Z)
-                // {
-                //     target_velocity.data.angular_z = tmp;
-                // }
-                // else
-                // {
-                //     continue;
-                // }
-                
-                // command_handle(table[PS2_ROCKER_LX].standard_cmd, &target_velocity, sizeof(struct cmd_velocity), &ps2_sender, ps2_target);
-            }
-            if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
-            {
-                // cmd_info.cmd = table[PS2_ROCKER_LY].standard_cmd;
-                // cmd_info.param = &ctrl_data.left_stick_y;
-                // command_handle(&cmd_info);
-            }
-            if (table[PS2_ROCKER_RX].standard_cmd != COMMAND_NONE)
-            {
-                // cmd_info.cmd = table[PS2_ROCKER_RX].standard_cmd;
-                // cmd_info.param = &ctrl_data.right_stick_x;
-                // command_handle(&cmd_info);
-            }
-            if (table[PS2_ROCKER_RY].standard_cmd != COMMAND_NONE)
-            {
-                // cmd_info.cmd = table[PS2_ROCKER_RY].standard_cmd;
-                // cmd_info.param = &ctrl_data.right_stick_y;
-                // command_handle(&cmd_info);
+                if (cmd[i] != COMMAND_NONE)
+                {
+                    float tmp = CHASSIS_VELOCITY_LINEAR_MAXIMUM;
+                    if (cmd[i] == COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z)
+                    {
+                        tmp = CHASSIS_VELOCITY_ANGULAR_MAXIMUM;
+                    }
+                    
+                    target_velocity.data.common = tmp * ((0x80 - (int)(i/2)) - value[i]) / 128;
+                    command_handle(cmd[i], &target_velocity, sizeof(struct cmd_velocity));
+                }
             }
         }
     }

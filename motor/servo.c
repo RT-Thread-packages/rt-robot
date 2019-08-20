@@ -19,7 +19,7 @@ servo_t servo_create(const char * pwm, int channel, float angle, rt_uint32_t plu
     servo_t new_servo = (servo_t) rt_malloc(sizeof(struct servo));
     if(new_servo == RT_NULL)
     {
-        LOG_E("Falied to allocate memory");
+        LOG_E("Falied to allocate memory for new servo");
         return RT_NULL;
     }
 
@@ -50,6 +50,7 @@ rt_err_t servo_destroy(servo_t servo)
 {
     RT_ASSERT(servo != RT_NULL);
 
+    LOG_D("Free servo");
     rt_free(servo);
 
     return RT_EOK;
@@ -59,6 +60,8 @@ rt_err_t servo_enable(servo_t servo)
 {
     RT_ASSERT(servo != RT_NULL);
 
+    LOG_D("Enabling servo");
+
     return rt_pwm_enable(servo->pwmdev, servo->channel);
 }
 
@@ -66,7 +69,14 @@ rt_err_t servo_disable(servo_t servo)
 {
     RT_ASSERT(servo != RT_NULL);
 
+    LOG_D("Disabling servo");
+
     return rt_pwm_disable(servo->pwmdev, servo->channel);
+}
+
+rt_err_t servo_reset(servo_t servo)
+{
+    return RT_EOK;
 }
 
 rt_err_t servo_set_angle(servo_t servo, float angle)

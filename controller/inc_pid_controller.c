@@ -6,7 +6,13 @@
 
 static rt_err_t inc_pid_controller_reset(void *pid)
 {
-    rt_memset(pid, 0, sizeof(struct inc_pid_controller));
+    inc_pid_controller_t inc_pid = (inc_pid_controller_t)pid;
+    
+    inc_pid->error = 0.0f;
+    inc_pid->error_l = 0.0f;
+    inc_pid->error_ll = 0.0f;
+    inc_pid->last_out = 0.0f;
+
     return RT_EOK;
 }
 
@@ -70,14 +76,6 @@ static rt_err_t inc_pid_controller_update(void *pid, float current_point)
     inc_pid->error_l = inc_pid->error;
 
     inc_pid->controller.output = inc_pid->last_out;
-
-    // rt_kprintf("%d - %d\n", current_point, pid->set_point);
-    // LOG_D("PID current: %d : setpoint %d - P%d I%d D%d - [%d]", current_point, pid->set_point, (int)(pid->p_error + 0.5f), (int)(pid->i_error + 0.5f), (int)(pid->d_error + 0.5f), (int)(pid->out + 0.5f));
-    // LOG_D("PID P Error: %d", (int)(pid->p_error + 0.5f));
-    // LOG_D("PID I Error: %d", (int)(pid->i_error + 0.5f));
-    // LOG_D("PID D Error: %d", (int)(pid->d_error + 0.5f));
-    // LOG_D("PID Last Out: %d", (int)(pid->last_out + 0.5f));
-    // LOG_D("PID Out: %d", (int)(pid->out + 0.5f));
 
     return RT_EOK;
 }

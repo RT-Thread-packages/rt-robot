@@ -15,8 +15,6 @@ struct single_pwm_motor
 
 static rt_err_t single_pwm_motor_enable(void *mot)
 {
-    RT_ASSERT(mot != RT_NULL);
-
     single_pwm_motor_t mot_sub = (single_pwm_motor_t)mot;
     
     rt_pwm_enable(mot_sub->pwm_dev, mot_sub->channel);
@@ -26,8 +24,6 @@ static rt_err_t single_pwm_motor_enable(void *mot)
 
 static rt_err_t single_pwm_motor_disable(void *mot)
 {
-    RT_ASSERT(mot != RT_NULL);
-
     single_pwm_motor_t mot_sub = (single_pwm_motor_t)mot;
 
     rt_pwm_disable(mot_sub->pwm_dev, mot_sub->channel);
@@ -35,10 +31,13 @@ static rt_err_t single_pwm_motor_disable(void *mot)
     return RT_EOK;
 }
 
+static rt_err_t single_pwm_motor_reset(void *mot)
+{
+    return RT_EOK;
+}
+
 static rt_err_t single_pwm_motor_set_speed(void *mot, rt_int16_t thousands)
 {
-    RT_ASSERT(mot != RT_NULL);
-    
     single_pwm_motor_t mot_sub = (single_pwm_motor_t)mot;
 
     if (thousands == 0)
@@ -93,6 +92,7 @@ single_pwm_motor_t single_pwm_motor_create(char *pwm, int channel, rt_base_t pin
     new_motor->pin2 = pin2;
     new_motor->mot.enable = single_pwm_motor_enable;
     new_motor->mot.disable = single_pwm_motor_disable;
+    new_motor->mot.reset = single_pwm_motor_reset;
     new_motor->mot.set_speed = single_pwm_motor_set_speed;
 
     rt_pin_mode(new_motor->pin1, PIN_MODE_OUTPUT);

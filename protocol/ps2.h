@@ -13,7 +13,7 @@
 #define PS2_GREEN_MODE      0x41
 #define PS2_RED_MODE        0x73
 
-// KEY
+// BUTTON
 #define PS2_BTN_SELECT      (1 << 0)
 #define PS2_BTN_L3          (1 << 1)
 #define PS2_BTN_R3          (1 << 2)

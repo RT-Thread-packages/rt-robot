@@ -15,8 +15,6 @@ struct dual_pwm_motor
 
 static rt_err_t dual_pwm_motor_enable(void *mot)
 {
-    RT_ASSERT(mot != RT_NULL);
-
     dual_pwm_motor_t mot_sub = (dual_pwm_motor_t)mot;
 
     rt_pwm_enable(mot_sub->pwm1_dev, mot_sub->pwm1_channel);
@@ -27,8 +25,6 @@ static rt_err_t dual_pwm_motor_enable(void *mot)
 
 static rt_err_t dual_pwm_motor_disable(void *mot)
 {
-    RT_ASSERT(mot != RT_NULL);
-
     dual_pwm_motor_t mot_sub = (dual_pwm_motor_t)mot;
     
     rt_pwm_disable(mot_sub->pwm1_dev, mot_sub->pwm1_channel);
@@ -37,10 +33,13 @@ static rt_err_t dual_pwm_motor_disable(void *mot)
     return RT_EOK;
 }
 
+static rt_err_t dual_pwm_motor_reset(void *mot)
+{
+    return RT_EOK;
+}
+
 static rt_err_t dual_pwm_motor_set_speed(void *mot, rt_int16_t thousands)
 {
-    RT_ASSERT(mot != RT_NULL);
-
     dual_pwm_motor_t mot_sub = (dual_pwm_motor_t)mot;
 
     if (thousands == 0)
@@ -98,6 +97,7 @@ dual_pwm_motor_t dual_pwm_motor_create(char *pwm1, int pwm1_channel, char *pwm2,
     new_motor->pwm2_channel = pwm2_channel;
     new_motor->mot.enable = dual_pwm_motor_enable;
     new_motor->mot.disable = dual_pwm_motor_disable;
+    new_motor->mot.reset = dual_pwm_motor_reset;
     new_motor->mot.set_speed = dual_pwm_motor_set_speed;
 
     return new_motor;

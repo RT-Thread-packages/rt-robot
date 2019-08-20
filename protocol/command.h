@@ -2,6 +2,7 @@
 #define __COMMAND_H__
 
 #include <rtthread.h>
+#include <chassis.h>
 
 /* Command */
 // down-link
@@ -87,6 +88,7 @@ struct cmd_velocity
         float linear_x;     // m/s
         float linear_y;
         float angular_z;
+        float common;
     } data; 
 };
 
@@ -99,6 +101,7 @@ struct command_sender
 typedef struct command_sender *command_sender_t;
 
 rt_err_t command_handle(rt_uint16_t cmd, void *param, rt_uint16_t size);
-rt_err_t command_send(command_sender_t sender, rt_int16_t cmd, void *param, rt_uint16_t size);
+rt_err_t command_send(command_sender_t sender, rt_uint16_t cmd, void *param, rt_uint16_t size);
+rt_err_t command_init(chassis_t chas);
 
 #endif

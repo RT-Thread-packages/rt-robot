@@ -8,25 +8,25 @@ typedef struct inc_pid_controller *inc_pid_controller_t;
 
 struct inc_pid_controller
 {
-    struct controller controller;
+    struct controller   controller;
     
-    float     kp;
-    float     ki;
-    float     kd;
+    float               kp;
+    float               ki;
+    float               kd;
 
-    float     minimum;
-    float     maximum;
+    float               minimum;
+    float               maximum;
 
-    float     p_error;
-    float     i_error;
-    float     d_error;
+    float               p_error;
+    float               i_error;
+    float               d_error;
 
-    float     error;
-    float     error_l;
-    float     error_ll;
-    
-    float     last_out;
-    rt_tick_t last_time;
+    float               error;
+    float               error_l;
+    float               error_ll;
+
+    float               last_out;
+    rt_tick_t           last_time;
 };
 
 inc_pid_controller_t    inc_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time);

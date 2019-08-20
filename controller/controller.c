@@ -8,12 +8,11 @@
 
 controller_t controller_create(rt_size_t size, rt_uint16_t sample_time)
 {
-    // TODO
     // Malloc memory and initialize PID
     controller_t new_controller = (controller_t)rt_malloc(size);
     if(new_controller == RT_NULL)
     {
-        LOG_E("Failed to malloc memory for automatic controller\n");
+        LOG_E("Failed to malloc memory for new controller\n");
         return RT_NULL;
     }
 
@@ -43,14 +42,16 @@ rt_err_t controller_destroy(controller_t controller)
 {
     RT_ASSERT(controller != RT_NULL);
     
+    LOG_D("Free controller");
+
     return controller->destroy(controller);
 }
 
 rt_err_t controller_enable(controller_t controller)
 {
-    // TODO
     RT_ASSERT(controller != RT_NULL);
 
+    LOG_D("Enabling controller");
     controller->enable = RT_TRUE;
 
     return RT_EOK;
@@ -58,9 +59,9 @@ rt_err_t controller_enable(controller_t controller)
 
 rt_err_t controller_disable(controller_t controller)
 {
-    // TODO
     RT_ASSERT(controller != RT_NULL);
 
+    LOG_D("Disabling controller");
     controller->enable = RT_FALSE;
 
     return RT_EOK;
@@ -68,7 +69,6 @@ rt_err_t controller_disable(controller_t controller)
 
 rt_err_t controller_reset(controller_t controller)
 {
-    // TODO
     RT_ASSERT(controller != RT_NULL);
 
     return controller->reset(controller);

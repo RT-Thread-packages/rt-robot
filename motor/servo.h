@@ -24,6 +24,7 @@ servo_t  servo_create(const char * pwm, int channel, float angle, rt_uint32_t pl
 rt_err_t servo_destroy(servo_t servo);
 rt_err_t servo_enable(servo_t servo);
 rt_err_t servo_disable(servo_t servo);
+rt_err_t servo_reset(servo_t servo);
 rt_err_t servo_set_angle(servo_t servo, float angle);
 
 #endif //  __SERVO_H__

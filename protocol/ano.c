@@ -13,7 +13,7 @@
 
 // Thread
 #define THREAD_STACK_SIZE      512
-#define THREAD_PRIORITY        ((RT_THREAD_PRIORITY_MAX / 3) + 5)
+#define THREAD_PRIORITY        ((RT_THREAD_PRIORITY_MAX / 3) + 2)
 #define THREAD_TICK            10
 
 static rt_thread_t tid_ano = RT_NULL;
@@ -75,8 +75,7 @@ static rt_err_t ano_sender_send(rt_uint16_t cmd, void *param, rt_uint16_t size)
         }
         
         break;
-    default:
-        break;
+    default: return RT_ERROR;
     }
 
     return RT_EOK;

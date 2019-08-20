@@ -8,26 +8,26 @@ typedef struct pos_pid_controller *pos_pid_controller_t;
 
 struct pos_pid_controller
 {
-    struct controller controller;
+    struct controller   controller;
     
-    float     kp;
-    float     ki;
-    float     kd;
+    float               kp;
+    float               ki;
+    float               kd;
 
-    float     minimum;
-    float     maximum;
-    float     anti_windup_value;
+    float               minimum;
+    float               maximum;
+    float               anti_windup_value;
 
-    float     p_error;
-    float     i_error;
-    float     d_error;
+    float               p_error;
+    float               i_error;
+    float               d_error;
 
-    float     integral;
-    float     error;
-    float     error_l;
-    
-    float     last_out;
-    rt_tick_t last_time;
+    float               integral;
+    float               error;
+    float               error_l;
+
+    float               last_out;
+    rt_tick_t           last_time;
 };
 
 pos_pid_controller_t    pos_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time);
