@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
+
 #include "wheel.h"
 
 #define DBG_SECTION_NAME  "wheel"

@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
 #ifndef __CHASSIS_H__
 #define __CHASSIS_H__
 

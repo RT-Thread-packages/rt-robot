@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #include "inc_pid_controller.h"
 
 #define DBG_SECTION_NAME  "inc_pid_controller"
