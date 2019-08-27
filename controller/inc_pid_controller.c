@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #include "inc_pid_controller.h"
 
 #define DBG_SECTION_NAME  "inc_pid_controller"
@@ -6,13 +16,41 @@
 
 static rt_err_t inc_pid_controller_reset(void *pid)
 {
-    rt_memset(pid, 0, sizeof(struct inc_pid_controller));
+    inc_pid_controller_t inc_pid = (inc_pid_controller_t)pid;
+    
+    inc_pid->error = 0.0f;
+    inc_pid->error_l = 0.0f;
+    inc_pid->error_ll = 0.0f;
+    inc_pid->last_out = 0.0f;
+
     return RT_EOK;
 }
 
 static rt_err_t inc_pid_controller_destroy(void *pid)
 {
     rt_free(pid);
+    return RT_EOK;
+}
+
+static rt_err_t inc_pid_controller_set_param(void *pid, controller_param_t param)
+{
+    inc_pid_controller_t inc_pid = (inc_pid_controller_t)pid;
+
+    inc_pid->kp = param->data.pid.kp;
+    inc_pid->ki = param->data.pid.ki;
+    inc_pid->kd = param->data.pid.kd;
+
+    return RT_EOK;
+}
+
+static rt_err_t inc_pid_controller_get_param(void *pid, controller_param_t param)
+{
+    inc_pid_controller_t inc_pid = (inc_pid_controller_t)pid;
+
+    param->data.pid.kp = inc_pid->kp;
+    param->data.pid.ki = inc_pid->ki;
+    param->data.pid.kd = inc_pid->kd;
+
     return RT_EOK;
 }
 
@@ -49,20 +87,12 @@ static rt_err_t inc_pid_controller_update(void *pid, float current_point)
 
     inc_pid->controller.output = inc_pid->last_out;
 
-    // rt_kprintf("%d - %d\n", current_point, pid->set_point);
-    // LOG_D("PID current: %d : setpoint %d - P%d I%d D%d - [%d]", current_point, pid->set_point, (int)(pid->p_error + 0.5f), (int)(pid->i_error + 0.5f), (int)(pid->d_error + 0.5f), (int)(pid->out + 0.5f));
-    // LOG_D("PID P Error: %d", (int)(pid->p_error + 0.5f));
-    // LOG_D("PID I Error: %d", (int)(pid->i_error + 0.5f));
-    // LOG_D("PID D Error: %d", (int)(pid->d_error + 0.5f));
-    // LOG_D("PID Last Out: %d", (int)(pid->last_out + 0.5f));
-    // LOG_D("PID Out: %d", (int)(pid->out + 0.5f));
-
     return RT_EOK;
 }
 
-inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd)
+inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd, rt_uint16_t sample_time)
 {
-    inc_pid_controller_t new_pid = (inc_pid_controller_t)controller_create(sizeof(struct inc_pid_controller));
+    inc_pid_controller_t new_pid = (inc_pid_controller_t)controller_create(sizeof(struct inc_pid_controller), sample_time);
     if(new_pid == RT_NULL)
     {
         return RT_NULL;
@@ -88,7 +118,9 @@ inc_pid_controller_t inc_pid_controller_create(float kp, float ki, float kd)
     new_pid->controller.reset = inc_pid_controller_reset;
     new_pid->controller.destroy = inc_pid_controller_destroy;
     new_pid->controller.update = inc_pid_controller_update;
-
+    new_pid->controller.set_param = inc_pid_controller_set_param;
+    new_pid->controller.get_param = inc_pid_controller_get_param;
+    
     return new_pid;
 }
 

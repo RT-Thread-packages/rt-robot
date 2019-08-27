@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #include "motor.h"
 
 #define DBG_SECTION_NAME  "motor"
@@ -9,7 +19,7 @@ motor_t motor_create(rt_size_t size)
     motor_t new_motor = (motor_t)rt_malloc(size);
     if (new_motor == RT_NULL)
     {
-        LOG_E("Falied to allocate memory for motor");
+        LOG_E("Falied to allocate memory for new motor\n");
         return RT_NULL;
     }
 
@@ -43,7 +53,6 @@ rt_err_t motor_run(motor_t mot, rt_int16_t thousands)
     RT_ASSERT(mot != RT_NULL);
 
     // Set speed (pwm) to desired value
-    // LOG_D("Set motor speed %d pwm", pwm);
     mot->set_speed(mot, thousands);
 
     return RT_EOK;
@@ -72,4 +81,11 @@ rt_err_t motor_destroy(motor_t mot)
     rt_free(mot);
 
     return RT_EOK;
+}
+
+rt_err_t motor_reset(motor_t mot)
+{
+    RT_ASSERT(mot != RT_NULL);
+
+    return mot->reset(mot);
 }

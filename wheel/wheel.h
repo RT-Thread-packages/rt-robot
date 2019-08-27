@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
+
 #ifndef __WHEEL_H__
 #define __WHEEL_H__
 
@@ -22,7 +32,7 @@ struct wheel
 };
 
 wheel_t     wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_controller, float radius, rt_uint16_t gear_ratio);
-void        wheel_destroy(wheel_t wheel);
+rt_err_t    wheel_destroy(wheel_t wheel);
 
 rt_err_t    wheel_enable(wheel_t whl);
 rt_err_t    wheel_disable(wheel_t whl);

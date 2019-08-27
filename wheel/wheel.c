@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
+
 #include "wheel.h"
 
 #define DBG_SECTION_NAME  "wheel"
@@ -10,7 +20,7 @@ wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_contro
     wheel_t new_wheel = (wheel_t) rt_malloc(sizeof(struct wheel));
     if(new_wheel == RT_NULL)
     {
-        LOG_E("Falied to allocate memory for dc wheel");
+        LOG_E("Falied to allocate memory for new wheel");
         return RT_NULL;
     }
 
@@ -24,20 +34,25 @@ wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_contro
     return new_wheel;
 }
 
-void wheel_destroy(wheel_t wheel)
+rt_err_t wheel_destroy(wheel_t whl)
 {
+    RT_ASSERT(whl != RT_NULL);
+
     LOG_D("Free wheel");
 
-    motor_destroy(wheel->w_motor);
-    encoder_destroy(wheel->w_encoder);
-    controller_destroy(wheel->w_controller);
+    motor_destroy(whl->w_motor);
+    encoder_destroy(whl->w_encoder);
+    controller_destroy(whl->w_controller);
 
-    rt_free(wheel);
+    rt_free(whl);
+
+    return RT_EOK;
 }
 
 rt_err_t wheel_enable(wheel_t whl)
 {
-    // TODO
+    RT_ASSERT(whl != RT_NULL);
+
     LOG_D("Enabling wheel");
 
     // Enable PWM for motor
@@ -45,7 +60,6 @@ rt_err_t wheel_enable(wheel_t whl)
 
     // Enable Encoder's interrupt
     encoder_enable(whl->w_encoder);
-    rt_thread_mdelay(whl->w_encoder->sample_time);
 
     // Enable control
     controller_enable(whl->w_controller);
@@ -55,7 +69,8 @@ rt_err_t wheel_enable(wheel_t whl)
 
 rt_err_t wheel_disable(wheel_t whl)
 {
-    // TODO
+    RT_ASSERT(whl != RT_NULL);
+
     LOG_D("Disabling wheel");
 
     // Disable PWM for motor
@@ -72,7 +87,16 @@ rt_err_t wheel_disable(wheel_t whl)
 
 rt_err_t wheel_reset(wheel_t whl)
 {
-    // TODO
+    RT_ASSERT(whl != RT_NULL);
+
+    // Reset Controller
+    controller_reset(whl->w_controller);
+
+    // Reset Motor
+    motor_reset(whl->w_motor);
+    
+    // Reset Encoder
+    encoder_reset(whl->w_encoder);
 
     return RT_EOK;
 }
@@ -80,12 +104,15 @@ rt_err_t wheel_reset(wheel_t whl)
 /** speed = rpm x 60 x 2 x PI x radius **/
 rt_err_t wheel_set_speed(wheel_t whl, double speed)
 {
+    RT_ASSERT(whl != RT_NULL);
+
     return wheel_set_rpm(whl, (rt_int16_t) (speed / 60.0 / 2.0 / whl->radius / PI));
 }
 
 rt_err_t wheel_set_rpm(wheel_t whl, rt_int16_t rpm)
 {
-    LOG_D("Set wheel speed %d rpm", rpm);
+    RT_ASSERT(whl != RT_NULL);
+
     controller_set_target(whl->w_controller, rpm);
     if(whl->w_controller->target == rpm)
     {
@@ -99,7 +126,8 @@ rt_err_t wheel_set_rpm(wheel_t whl, rt_int16_t rpm)
 
 void wheel_update(wheel_t whl)
 {
-    // TODO
+    RT_ASSERT(whl != RT_NULL);
+
     // Get current rpm
     whl->rpm = encoder_measure_rpm(whl->w_encoder);
 
@@ -112,8 +140,7 @@ void wheel_update(wheel_t whl)
 
 void wheel_stop(wheel_t whl)
 {
+    RT_ASSERT(whl != RT_NULL);
+
     motor_stop(whl->w_motor);
 }
-
-// Maximum Speed
-// Wheel Thread

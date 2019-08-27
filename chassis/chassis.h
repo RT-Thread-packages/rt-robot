@@ -1,17 +1,20 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
 #ifndef __CHASSIS_H__
 #define __CHASSIS_H__
 
 #include <kinematics.h>
 #include <wheel.h>
 
-enum chassis_command
-{
-    CHASSIS_FORWARD_ANALOG,
-    CHASSIS_BACKWARD_ANALOG,
-    CHASSIS_TURN_LEFT_ANALOG,
-    CHASSIS_TURN_RIGHT_ANALOG,
-    CHASSIS_STOP,
-};
+#define CHASSIS_VELOCITY_LINEAR_MAXIMUM         0.1f                                                  // m/s
+#define CHASSIS_VELOCITY_ANGULAR_MAXIMUM        5.0f * CHASSIS_VELOCITY_LINEAR_MAXIMUM                // rad/s
 
 typedef struct chassis *chassis_t;
 
@@ -23,7 +26,7 @@ struct chassis
 };
 
 chassis_t   chassis_create(wheel_t* c_wheel, kinematics_t c_kinematics);
-void        chassis_destroy(chassis_t chas);
+rt_err_t    chassis_destroy(chassis_t chas);
 
 rt_err_t    chassis_enable(chassis_t chas);
 rt_err_t    chassis_disable(chassis_t chas);
@@ -34,6 +37,12 @@ rt_err_t    chassis_set_rpm(chassis_t chas, rt_int16_t target_rpm[]);
 
 rt_err_t    chassis_update(chassis_t chas);
 
-rt_err_t    chassis_parse_command(chassis_t chas, rt_int8_t cmd, void *args);
+rt_err_t    chassis_straight(chassis_t chas, float linear_x);
+rt_err_t    chassis_move(chassis_t chas, float linear_y);
+rt_err_t    chassis_rotate(chassis_t chas, float angular_z);
+
+rt_err_t    chassis_set_velocity_x(chassis_t chas, float linear_x);
+rt_err_t    chassis_set_velocity_y(chassis_t chas, float linear_y);
+rt_err_t    chassis_set_velocity_z(chassis_t chas, float angular_z);
 
 #endif
