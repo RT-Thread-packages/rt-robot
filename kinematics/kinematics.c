@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-07-17     Wu Han       The first version
+ */
+
 #include "kinematics.h"
 
 #define DBG_SECTION_NAME  "kinematics"
@@ -38,16 +48,18 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     return new_kinematics;
 }
 
-void kinematics_destroy(kinematics_t kinematics)
+void kinematics_destroy(kinematics_t kin)
 {
+    RT_ASSERT(kin != RT_NULL);
     LOG_I("Free Kinematics");
-    rt_free(kinematics);
+    rt_free(kin);
 }
 
 rt_err_t kinematics_reset(kinematics_t kin)
 {
     // TODO
-
+    RT_ASSERT(kin != RT_NULL);
+    LOG_I("Reset kinematics");
     return RT_EOK;
 }
 
@@ -100,11 +112,6 @@ rt_int16_t* kinematics_get_rpm(struct kinematics kin, struct velocity target_vel
 
     // rear-right motor
     cal_rpm.motor4 = x_rpm - y_rpm + tan_rpm;
-
-    // rt_kprintf("cal_rpm[1]: %d\n", cal_rpm.motor1);
-    // rt_kprintf("cal_rpm[2]: %d\n", cal_rpm.motor2);
-    // rt_kprintf("cal_rpm[3]: %d\n", cal_rpm.motor3);
-    // rt_kprintf("cal_rpm[4]: %d\n", cal_rpm.motor4);
 
     if(kin.k_base == TWO_WD)
     {

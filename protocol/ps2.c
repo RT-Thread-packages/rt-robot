@@ -1,6 +1,12 @@
-/*********************************************************
-Change From YFRobot. www.yfrobot.com
-**********************************************************/
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
 
 #include "ps2.h"
 #include "ps2_table.h"
@@ -9,9 +15,9 @@ Change From YFRobot. www.yfrobot.com
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-#define THREAD_DELAY_TIME           50
+#define THREAD_DELAY_TIME           30
 
-#define THREAD_PRIORITY             16
+#define THREAD_PRIORITY             ((RT_THREAD_PRIORITY_MAX / 3) + 3)
 #define THREAD_STACK_SIZE           1024
 #define THREAD_TIMESLICE            10
 
@@ -109,7 +115,7 @@ int ps2_scan(ps2_ctrl_data_t pt)
     temp[4] = 0;
 
     transfer(temp, temp, 9);
-    
+
     pt->button = temp[3] | (temp[4] << 8);
     pt->right_stick_x = temp[5];
     pt->right_stick_y = temp[6];
@@ -137,9 +143,36 @@ int ps2_read_light(void)
     return light_mode;
 }
 
+static rt_err_t ps2_sender_send(rt_uint16_t cmd, void *param, rt_uint16_t size)
+{
+    // TODO
+
+    if (cmd == COMMAND_RC_VIBRATE)
+    {
+
+    }
+    else
+    {
+        return RT_ERROR;
+    }
+
+    return RT_EOK;
+}
+
+static struct command_sender ps2_sender = {
+    .name = "ano",
+    .send = ps2_sender_send
+};
+
+command_sender_t ps2_get_sender(void)
+{
+    return &ps2_sender;
+}
+
 static void ps2_thread_entry(void *param)
 {
     struct ps2_ctrl_data ctrl_data;
+    struct cmd_velocity target_velocity;
 
     while (1)
     {
@@ -152,7 +185,7 @@ static void ps2_thread_entry(void *param)
             {
                 if (table[i].standard_cmd != COMMAND_NONE)
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL);
+                    command_handle(table[i].standard_cmd, RT_NULL, 0);
                 }
             }
         }
@@ -160,21 +193,31 @@ static void ps2_thread_entry(void *param)
         // rocker
         if (ps2_read_light() == PS2_RED_MODE)
         {
-            if (table[PS2_ROCKER_LX].standard_cmd != COMMAND_NONE)
+            uint8_t value[4] = {
+                ctrl_data.left_stick_x, 
+                ctrl_data.right_stick_x,
+                ctrl_data.left_stick_y,
+                ctrl_data.right_stick_y};
+
+            rt_int16_t cmd[4] = {
+                table[PS2_ROCKER_LX].standard_cmd,
+                table[PS2_ROCKER_LY].standard_cmd,
+                table[PS2_ROCKER_RX].standard_cmd,
+                table[PS2_ROCKER_RY].standard_cmd};
+
+            for (int i = 0; i < 4; i++)
             {
-                command_handle(table[PS2_ROCKER_LX].standard_cmd, &ctrl_data.left_stick_x);
-            }
-            if (table[PS2_ROCKER_LY].standard_cmd != COMMAND_NONE)
-            {
-                command_handle(table[PS2_ROCKER_LY].standard_cmd, &ctrl_data.left_stick_y);
-            }
-            if (table[PS2_ROCKER_RX].standard_cmd != COMMAND_NONE)
-            {
-                command_handle(table[PS2_ROCKER_RX].standard_cmd, &ctrl_data.right_stick_x);
-            }
-            if (table[PS2_ROCKER_RY].standard_cmd != COMMAND_NONE)
-            {
-                command_handle(table[PS2_ROCKER_RY].standard_cmd, &ctrl_data.right_stick_y);
+                if (cmd[i] != COMMAND_NONE)
+                {
+                    float tmp = CHASSIS_VELOCITY_LINEAR_MAXIMUM;
+                    if (cmd[i] == COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z)
+                    {
+                        tmp = CHASSIS_VELOCITY_ANGULAR_MAXIMUM;
+                    }
+                    
+                    target_velocity.data.common = tmp * ((0x80 - (int)(i/2)) - value[i]) / 128;
+                    command_handle(cmd[i], &target_velocity, sizeof(struct cmd_velocity));
+                }
             }
         }
     }
@@ -194,6 +237,8 @@ void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t d
     
     hal_cs_high();
     hal_clk_high();
+
+    // cmd_info.target = target;
 
     tid_ps2 = rt_thread_create("ps2",
                           ps2_thread_entry, RT_NULL,

@@ -1,9 +1,19 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #ifndef __PS2_H__
 #define __PS2_H__
 
 #include <rtthread.h>
 #include <rtdevice.h>
-#include <command.h>
+#include "command.h"
 
 // COMMAND
 #define PS2_CMD_VIBRATE     1
@@ -13,7 +23,7 @@
 #define PS2_GREEN_MODE      0x41
 #define PS2_RED_MODE        0x73
 
-// KEY
+// BUTTON
 #define PS2_BTN_SELECT      (1 << 0)
 #define PS2_BTN_L3          (1 << 1)
 #define PS2_BTN_R3          (1 << 2)
@@ -50,5 +60,8 @@ struct ps2_ctrl_data
 void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin);
 int  ps2_scan(ps2_ctrl_data_t pt);
 int  ps2_read_light(void);
+
+command_sender_t ps2_get_sender(void);
+rt_err_t ps2_set_target(void *target);
 
 #endif

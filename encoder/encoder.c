@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #include <rtdevice.h>
 #include <encoder.h>
 
@@ -5,7 +15,7 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
-encoder_t encoder_create(rt_size_t size)
+encoder_t encoder_create(rt_size_t size, rt_uint16_t sample_time)
 {
     // Malloc memory and initialize
     encoder_t new_encoder = (encoder_t)rt_malloc(size);
@@ -17,6 +27,7 @@ encoder_t encoder_create(rt_size_t size)
 
     new_encoder->pulse_count = 0;
     new_encoder->last_count = 0;
+    new_encoder->sample_time = sample_time;
 
     return new_encoder;
 }
@@ -45,7 +56,7 @@ rt_err_t encoder_disable(encoder_t enc)
     return enc->disable(enc);
 }
 
-rt_int16_t encoder_read(encoder_t enc)
+rt_int32_t encoder_read(encoder_t enc)
 {
     RT_ASSERT(enc != RT_NULL);
 
@@ -57,6 +68,7 @@ rt_err_t encoder_reset(encoder_t enc)
     RT_ASSERT(enc != RT_NULL);
 
     enc->pulse_count = 0;
+    enc->last_count = 0;
 
     return RT_EOK;
 }
@@ -64,7 +76,7 @@ rt_err_t encoder_reset(encoder_t enc)
 rt_int16_t encoder_measure_cps(encoder_t enc)
 {
     RT_ASSERT(enc != RT_NULL);
-    // TODO
+    
     // return count per second
     if((rt_tick_get() - enc->last_time) < rt_tick_from_millisecond(enc->sample_time))
     {
@@ -73,15 +85,6 @@ rt_int16_t encoder_measure_cps(encoder_t enc)
     }
 
     rt_int32_t diff_count = enc->pulse_count - enc->last_count;
-    
-    // if (diff_count >= INT32_MAX)
-    // {
-    //     diff_count = -(enc->pulse_count + enc->last_count);
-    // }
-    // if (diff_count <= INT32_MIN)
-    // {
-    //     diff_count = enc->pulse_count + enc->last_count;
-    // }
 
     enc->cps = diff_count * 1000 / enc->sample_time;
     enc->last_count = enc->pulse_count;

@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-08-26     sogwms       The first version
+ */
+
 #include "ab_phase_encoder.h"
 
 #define DBG_SECTION_NAME  "ab_phase_encoder"
@@ -18,7 +28,7 @@ static void encoder_isr(void *args)
 {
     ab_phase_encoder_t enc_sub = (ab_phase_encoder_t)args;
     int val = rt_pin_read(enc_sub->pin_a) * 2 + rt_pin_read(enc_sub->pin_b);
-    // rt_kprintf("val:%d\n", val);
+
     if (AB_PHASE_ENCODER_TABLE[enc_sub->last_value] == val)
     {
         enc_sub->enc.dir = ENCODER_DIR_FORWARD;
@@ -34,8 +44,6 @@ static void encoder_isr(void *args)
 
 static rt_err_t ab_phase_encoder_enable(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     ab_phase_encoder_t enc_sub = (ab_phase_encoder_t)enc;
 
     // Attach interrupts
@@ -53,8 +61,6 @@ static rt_err_t ab_phase_encoder_enable(void *enc)
 
 static rt_err_t ab_phase_encoder_disable(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     ab_phase_encoder_t enc_sub = (ab_phase_encoder_t)enc;
 
     rt_pin_irq_enable(enc_sub->pin_a, PIN_IRQ_DISABLE);
@@ -65,8 +71,6 @@ static rt_err_t ab_phase_encoder_disable(void *enc)
 
 static rt_err_t ab_phase_encoder_destroy(void *enc)
 {
-    RT_ASSERT(enc != RT_NULL);
-
     ab_phase_encoder_disable(enc);
     ab_phase_encoder_t enc_sub = (ab_phase_encoder_t)enc;
     rt_pin_detach_irq(enc_sub->pin_a);
@@ -77,10 +81,10 @@ static rt_err_t ab_phase_encoder_destroy(void *enc)
     return RT_EOK;
 }
 
-ab_phase_encoder_t ab_phase_encoder_create(rt_base_t pin_a, rt_base_t pin_b, rt_uint16_t pulse_revol)
+ab_phase_encoder_t ab_phase_encoder_create(rt_base_t pin_a, rt_base_t pin_b, rt_uint16_t pulse_revol, rt_uint16_t sample_time)
 {
     // Malloc memory and initialize pulse_count and pin
-    ab_phase_encoder_t new_encoder = (ab_phase_encoder_t)encoder_create(sizeof(struct ab_phase_encoder));
+    ab_phase_encoder_t new_encoder = (ab_phase_encoder_t)encoder_create(sizeof(struct ab_phase_encoder), sample_time);
     if(new_encoder == RT_NULL)
     {
         return RT_NULL;
