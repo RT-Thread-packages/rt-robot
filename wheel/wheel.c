@@ -31,6 +31,9 @@ wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_contro
     new_wheel -> radius       = radius;
     new_wheel -> gear_ratio   = gear_ratio;
 
+    // 3. pre compute the speed to rpm transform ;)
+    new_wheel -> speed_to_rpm = 1.0 / (w->radius * 2.0 * 60.0 * PI);
+
     return new_wheel;
 }
 
@@ -102,6 +105,8 @@ rt_err_t wheel_reset(wheel_t whl)
 }
 
 /** speed = rpm x 60 x 2 x PI x radius **/
+/** so : rpm = speed x 1.0f / (radius x 60 x 2 x PT) */
+/** then : rpm = speed * speed_to_rpm_transform --> precomputed */
 rt_err_t wheel_set_speed(wheel_t whl, double speed)
 {
     RT_ASSERT(whl != RT_NULL);
