@@ -16,6 +16,12 @@
 
 wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_controller, float radius, rt_uint16_t gear_ratio)
 {
+    //radius must not be zero, protect:
+    if(radius == 0.0f) 
+    {
+        return RT_NULL;
+    }
+
     // 1. Malloc memory for wheel
     wheel_t new_wheel = (wheel_t) rt_malloc(sizeof(struct wheel));
     if(new_wheel == RT_NULL)
@@ -111,7 +117,7 @@ rt_err_t wheel_set_speed(wheel_t whl, double speed)
 {
     RT_ASSERT(whl != RT_NULL);
 
-    return wheel_set_rpm(whl, (rt_int16_t) (speed / 60.0 / 2.0 / whl->radius / PI));
+    return wheel_set_rpm(whl, (rt_int16_t) (speed * whl->speed_to_rpm));
 }
 
 rt_err_t wheel_set_rpm(wheel_t whl, rt_int16_t rpm)
