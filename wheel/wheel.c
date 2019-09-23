@@ -16,6 +16,12 @@
 
 wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_controller, float radius, rt_uint16_t gear_ratio)
 {
+    //radius must not be zero, protect:
+    if(radius == 0.0f) 
+    {
+        return RT_NULL;
+    }
+
     // 1. Malloc memory for wheel
     wheel_t new_wheel = (wheel_t) rt_malloc(sizeof(struct wheel));
     if(new_wheel == RT_NULL)
@@ -30,6 +36,9 @@ wheel_t wheel_create(motor_t w_motor, encoder_t w_encoder, controller_t w_contro
     new_wheel -> w_controller = w_controller;
     new_wheel -> radius       = radius;
     new_wheel -> gear_ratio   = gear_ratio;
+
+    // 3. pre compute the speed to rpm transform ;)
+    new_wheel -> speed_to_rpm = 1.0 / (w->radius * 2.0 * 60.0 * PI);
 
     return new_wheel;
 }
@@ -102,11 +111,13 @@ rt_err_t wheel_reset(wheel_t whl)
 }
 
 /** speed = rpm x 60 x 2 x PI x radius **/
+/** so : rpm = speed x 1.0f / (radius x 60 x 2 x PT) */
+/** then : rpm = speed * speed_to_rpm_transform --> precomputed */
 rt_err_t wheel_set_speed(wheel_t whl, double speed)
 {
     RT_ASSERT(whl != RT_NULL);
 
-    return wheel_set_rpm(whl, (rt_int16_t) (speed / 60.0 / 2.0 / whl->radius / PI));
+    return wheel_set_rpm(whl, (rt_int16_t) (speed * whl->speed_to_rpm));
 }
 
 rt_err_t wheel_set_rpm(wheel_t whl, rt_int16_t rpm)

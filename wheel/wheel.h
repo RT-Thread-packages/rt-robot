@@ -28,6 +28,7 @@ struct wheel
 
     rt_int16_t      rpm;
     float           radius;
+    double          speed_to_rpm;
     rt_uint16_t     gear_ratio;
 };
 
