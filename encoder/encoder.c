@@ -86,7 +86,7 @@ rt_int16_t encoder_measure_cps(encoder_t enc)
 
     rt_int32_t diff_count = enc->pulse_count - enc->last_count;
 
-    enc->cps = diff_count * 1000 / enc->sample_time;
+    enc->cps = diff_count * 1000 ;
     enc->last_count = enc->pulse_count;
     enc->last_time = rt_tick_get();
 
@@ -98,7 +98,7 @@ rt_int16_t encoder_measure_rpm(encoder_t enc)
     RT_ASSERT(enc != RT_NULL);
     
     // return resolution per minute
-    rt_int16_t res_rpm = encoder_measure_cps(enc) * 60 / enc->pulse_revol;
+    rt_int16_t res_rpm = encoder_measure_cps(enc) / enc->pulse_revol * 60;
 
     return res_rpm;
 }
