@@ -90,8 +90,7 @@ rt_err_t chassis_set_velocity(chassis_t chas, struct velocity target_velocity)
 {
     RT_ASSERT(chas != RT_NULL);
 
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, target_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, target_velocity);
     chassis_set_rpm(chas, res_rpm);
 
     return RT_EOK;
@@ -131,8 +130,7 @@ rt_err_t chassis_straight(chassis_t chas, float linear_x)
         .linear_y = 0.0f,
         .angular_z = 0.0f
     };
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, target_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, target_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }
 
@@ -145,8 +143,7 @@ rt_err_t chassis_move(chassis_t chas, float linear_y)
         .linear_y = linear_y,
         .angular_z = 0.0f
     };
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, target_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, target_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }
 
@@ -159,8 +156,7 @@ rt_err_t chassis_rotate(chassis_t chas, float angular_z)
         .linear_y = 0.0f,
         .angular_z = angular_z
     };
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, target_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, target_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }
 
@@ -169,8 +165,7 @@ rt_err_t chassis_set_velocity_x(chassis_t chas, float linear_x)
     RT_ASSERT(chas != RT_NULL);
 
     chas->c_velocity.linear_x = linear_x;
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }
 
@@ -179,8 +174,7 @@ rt_err_t chassis_set_velocity_y(chassis_t chas, float linear_y)
     RT_ASSERT(chas != RT_NULL);
 
     chas->c_velocity.linear_y = linear_y;
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }
 
@@ -189,7 +183,6 @@ rt_err_t chassis_set_velocity_z(chassis_t chas, float angular_z)
     RT_ASSERT(chas != RT_NULL);
     
     chas->c_velocity.angular_z = angular_z;
-    rt_int16_t res_rpm[4];
-    kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity, res_rpm);
+    rt_int16_t* res_rpm = kinematics_get_rpm(*chas->c_kinematics, chas->c_velocity);
     return chassis_set_rpm(chas, res_rpm);
 }

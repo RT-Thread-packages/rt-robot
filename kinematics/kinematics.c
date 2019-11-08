@@ -14,6 +14,10 @@
 #define DBG_LEVEL         DBG_LOG
 #include <rtdbg.h>
 
+#define PI 3.1415926f
+
+static rt_int16_t* res_rpm;
+
 kinematics_t kinematics_create(enum base k_base, float length_x, float length_y, float wheel_radius)
 {
     kinematics_t new_kinematics = (kinematics_t)rt_malloc(sizeof(struct kinematics));
@@ -26,32 +30,34 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     new_kinematics->k_base       = k_base;
     new_kinematics->length_x     = length_x;
     new_kinematics->length_y     = length_y;
-    new_kinematics->wheel_radius = wheel_radius;
+    new_kinematics->circumference = wheel_radius * 2.0f * PI;
 
     if(k_base == TWO_WD)
     {
         new_kinematics->total_wheels = 2;
     }
-    if(k_base == FOUR_WD)
+    else if(k_base == FOUR_WD)
     {
         new_kinematics->total_wheels = 4;
     }
-    if(k_base == ACKERMANN)
+    else if(k_base == ACKERMANN)
     {
         new_kinematics->total_wheels = 3;
     }
-    if(k_base == MECANUM)
+    else if(k_base == MECANUM)
     {
         new_kinematics->total_wheels = 4;
     }
-
+    res_rpm = (rt_int16_t*) rt_malloc(sizeof(rt_int16_t) * new_kinematics->total_wheels);
     return new_kinematics;
 }
 
 void kinematics_destroy(kinematics_t kin)
 {
     RT_ASSERT(kin != RT_NULL);
+    RT_ASSERT(res_rpm != RT_NULL);
     LOG_I("Free Kinematics");
+    rt_free(res_rpm);
     rt_free(kin);
 }
 
@@ -63,12 +69,13 @@ rt_err_t kinematics_reset(kinematics_t kin)
     return RT_EOK;
 }
 
+
 /* Return desired rpm for each motor given target velocity */
-void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_int16_t *rpm)
+rt_int16_t* kinematics_get_rpm(struct kinematics kin, struct velocity target_vel)
 {
     // TODO
     struct rpm cal_rpm;
-    rt_int16_t res_rpm[4] = {0};
+    RT_ASSERT(res_rpm != RT_NULL);
 
     float linear_vel_x_mins;
     float linear_vel_y_mins;
@@ -93,9 +100,9 @@ void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_in
 
     tangential_vel = angular_vel_z_mins * ((kin.length_x / 2) + (kin.length_y / 2));
 
-    x_rpm   = linear_vel_x_mins / kin.wheel_radius;
-    y_rpm   = linear_vel_y_mins / kin.wheel_radius;
-    tan_rpm = tangential_vel / kin.wheel_radius;
+    x_rpm   = linear_vel_x_mins / kin.circumference;
+    y_rpm   = linear_vel_y_mins / kin.circumference ;
+    tan_rpm = tangential_vel / kin.circumference;
 
     // front-left motor
     cal_rpm.motor1 = x_rpm - y_rpm - tan_rpm;
@@ -134,28 +141,22 @@ void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_in
         res_rpm[2] = cal_rpm.motor3;
         res_rpm[3] = cal_rpm.motor4;
     }
-    else
-    {
-        return;
-    }
-    
-    for (int i = 0; i < 4; i++)
-    {
-        rpm[i] = res_rpm[i];
-    }
+
+    return res_rpm;
 }
 
+
 /* Return current velocity given rpm of each motor */
-void kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm, struct velocity *velocity)
+struct velocity kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm)
 {
     // TODO
     struct velocity res_vel;
 
     int total_wheels = 0;
     if(kin.k_base == TWO_WD) total_wheels = 2;
-    if(kin.k_base == FOUR_WD) total_wheels = 4;
-    if(kin.k_base == ACKERMANN) total_wheels = 2;
-    if(kin.k_base == MECANUM) total_wheels = 4;
+    else if(kin.k_base == FOUR_WD) total_wheels = 4;
+    else if(kin.k_base == ACKERMANN) total_wheels = 2;
+    else if(kin.k_base == MECANUM) total_wheels = 4;
 
     float average_rps_x;
     float average_rps_y;
@@ -163,18 +164,18 @@ void kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm, stru
 
     //convert average revolutions per minute to revolutions per second
     average_rps_x = ((float)(current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60; // RPM
-    res_vel.linear_x = average_rps_x * kin.wheel_radius; // m/s
+    res_vel.linear_x = average_rps_x * kin.circumference; // m/s
 
     //convert average revolutions per minute in y axis to revolutions per second
     average_rps_y = ((float)(-current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 - current_rpm.motor4) / total_wheels) / 60; // RPM
     if(kin.k_base == MECANUM)
-        res_vel.linear_y = average_rps_y * kin.wheel_radius; // m/s
+        res_vel.linear_y = average_rps_y * kin.circumference; // m/s
     else
         res_vel.linear_y = 0;
 
     //convert average revolutions per minute to revolutions per second
     average_rps_a = ((float)(-current_rpm.motor1 + current_rpm.motor2 - current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60;
-    res_vel.angular_z =  (average_rps_a * kin.wheel_radius) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
+    res_vel.angular_z =  (average_rps_a * kin.circumference) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
 
-    rt_memcpy(velocity, &res_vel, sizeof(struct velocity));
+    return res_vel;
 }
