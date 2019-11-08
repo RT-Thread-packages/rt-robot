@@ -64,15 +64,11 @@ rt_err_t kinematics_reset(kinematics_t kin)
 }
 
 /* Return desired rpm for each motor given target velocity */
-rt_int16_t* kinematics_get_rpm(struct kinematics kin, struct velocity target_vel)
+void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_int16_t *rpm)
 {
     // TODO
     struct rpm cal_rpm;
-    rt_int16_t* res_rpm = (rt_int16_t*) rt_malloc(sizeof(rt_int16_t) * 4);
-    for(int i = 0; i < 4; i++)
-    {
-        res_rpm[i] = 0;
-    }
+    rt_int16_t res_rpm[4] = {0};
 
     float linear_vel_x_mins;
     float linear_vel_y_mins;
@@ -118,32 +114,39 @@ rt_int16_t* kinematics_get_rpm(struct kinematics kin, struct velocity target_vel
         res_rpm[0] = cal_rpm.motor3;
         res_rpm[1] = cal_rpm.motor4;
     }
-    if(kin.k_base == FOUR_WD)
+    else if(kin.k_base == FOUR_WD)
     {
         res_rpm[0] = cal_rpm.motor1;
         res_rpm[1] = cal_rpm.motor2;
         res_rpm[2] = cal_rpm.motor3;
         res_rpm[3] = cal_rpm.motor4;
     }
-    if(kin.k_base == ACKERMANN)
+    else if(kin.k_base == ACKERMANN)
     {
         res_rpm[0] = target_vel.angular_z;
         res_rpm[1] = cal_rpm.motor3;
         res_rpm[2] = cal_rpm.motor4;
     }
-    if(kin.k_base == MECANUM)
+    else if(kin.k_base == MECANUM)
     {
         res_rpm[0] = cal_rpm.motor1;
         res_rpm[1] = cal_rpm.motor2;
         res_rpm[2] = cal_rpm.motor3;
         res_rpm[3] = cal_rpm.motor4;
     }
-
-    return res_rpm;
+    else
+    {
+        return;
+    }
+    
+    for (int i = 0; i < 4; i++)
+    {
+        rpm[i] = res_rpm[i];
+    }
 }
 
 /* Return current velocity given rpm of each motor */
-struct velocity kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm)
+void kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm, struct velocity *velocity)
 {
     // TODO
     struct velocity res_vel;
@@ -173,5 +176,5 @@ struct velocity kinematics_get_velocity(struct kinematics kin, struct rpm curren
     average_rps_a = ((float)(-current_rpm.motor1 + current_rpm.motor2 - current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60;
     res_vel.angular_z =  (average_rps_a * kin.wheel_radius) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
 
-    return res_vel;
+    rt_memcpy(velocity, &res_vel, sizeof(struct velocity));
 }
