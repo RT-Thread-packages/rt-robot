@@ -52,7 +52,7 @@ kinematics_t    kinematics_create(enum base k_base, float length_x, float length
 void            kinematics_destroy(kinematics_t kinematics);
 rt_err_t        kinematics_reset(kinematics_t kin);
 
-rt_int16_t*     kinematics_get_rpm(struct kinematics kin, struct velocity target_vel);
-struct velocity kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm);
+void            kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_int16_t *rpm);
+void            kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm, struct velocity *velocity);
 
 #endif
