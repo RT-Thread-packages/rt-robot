@@ -17,7 +17,8 @@ enum base {
     TWO_WD = 0, 
     FOUR_WD, 
     ACKERMANN, 
-    MECANUM
+    MECANUM,
+		FOUR_WD_ALLDIR
 };
 
 // rad/min
