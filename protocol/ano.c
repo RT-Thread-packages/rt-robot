@@ -110,10 +110,10 @@ static int _send_data(uint8_t *buffer, uint8_t length)
 
 static void _get_pid_param(uint8_t *buffer, float *kpid)
 {
-	for(int i = 0; i < 9; i++)
-	{
-		kpid[i] = GET_PID_PARAM(buffer, (i + 2) * 2); 
-	}
+    for(int i = 0; i < 9; i++)
+    {
+	kpid[i] = GET_PID_PARAM(buffer, (i + 2) * 2); 
+    }
 }
 
 static void ano_send_check(uint8_t head, uint8_t check_sum)
