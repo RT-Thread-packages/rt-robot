@@ -106,13 +106,13 @@ static int _send_data(uint8_t *buffer, uint8_t length)
     return RT_ERROR;
 }
 
-#define GET_PID_PARAM(buffer, offset)	(float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + offset) << 8) | *(buffer + (offset + 1))));
+#define _GET_PID_PARAM(buffer, offset)	(float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + offset) << 8) | *(buffer + (offset + 1))));
 
 static void _get_pid_param(uint8_t *buffer, float *kpid)
 {
     for(int i = 0; i < 9; i++)
     {
-        kpid[i] = GET_PID_PARAM(buffer, (i + 2) * 2); 
+        kpid[i] = _GET_PID_PARAM(buffer, (i + 2) * 2); 
     }
 }
 
