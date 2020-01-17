@@ -30,23 +30,22 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     new_kinematics->length_y     = length_y;
     new_kinematics->wheel_cir = wheel_radius * 2.0f * PI;;
 
-    if(k_base == TWO_WD)
+    switch(k_base)
     {
+    case TWO_WD:
         new_kinematics->total_wheels = 2;
-    }
-    if(k_base == FOUR_WD)
-    {
-        new_kinematics->total_wheels = 4;
-    }
-    if(k_base == ACKERMANN)
-    {
+	    break;
+    case ACKERMANN:
         new_kinematics->total_wheels = 3;
-    }
-    if(k_base == MECANUM)
-    {
+        break;
+    case FOUR_WD:
+    case MECANUM:
         new_kinematics->total_wheels = 4;
+        break;
+    default:
+        break;
     }
-
+    
     return new_kinematics;
 }
 
@@ -111,39 +110,29 @@ void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_in
     // rear-right motor
     cal_rpm.motor4 = x_rpm - y_rpm + tan_rpm;
 
-    if(kin.k_base == TWO_WD)
+    switch(kin.k_base)
     {
+    case TWO_WD:
         res_rpm[0] = cal_rpm.motor3;
         res_rpm[1] = cal_rpm.motor4;
-    }
-    else if(kin.k_base == FOUR_WD)
-    {
-        res_rpm[0] = cal_rpm.motor1;
-        res_rpm[1] = cal_rpm.motor2;
-        res_rpm[2] = cal_rpm.motor3;
-        res_rpm[3] = cal_rpm.motor4;
-    }
-    else if(kin.k_base == ACKERMANN)
-    {
+        rt_memcpy(rpm, &res_rpm[0], sizeof(res_rpm));
+        break;
+    case ACKERMANN:
         res_rpm[0] = target_vel.angular_z;
         res_rpm[1] = cal_rpm.motor3;
         res_rpm[2] = cal_rpm.motor4;
-    }
-    else if(kin.k_base == MECANUM)
-    {
+        rt_memcpy(rpm, &res_rpm[0], sizeof(res_rpm));
+        break;
+    case FOUR_WD:
+    case MECANUM:
         res_rpm[0] = cal_rpm.motor1;
         res_rpm[1] = cal_rpm.motor2;
         res_rpm[2] = cal_rpm.motor3;
         res_rpm[3] = cal_rpm.motor4;
-    }
-    else
-    {
-        return;
-    }
-    
-    for (int i = 0; i < 4; i++)
-    {
-        rpm[i] = res_rpm[i];
+        rt_memcpy(rpm, &res_rpm[0], sizeof(res_rpm));
+        break;
+    default:
+        break;
     }
 }
 
