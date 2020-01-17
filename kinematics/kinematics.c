@@ -34,7 +34,7 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     {
     case TWO_WD:
         new_kinematics->total_wheels = 2;
-	    break;
+        break;
     case ACKERMANN:
         new_kinematics->total_wheels = 3;
         break;
