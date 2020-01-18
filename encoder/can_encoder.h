@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2019, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-11-14     Soil_L       The first version
+ */
 #ifndef _CAN_ENCODER_
 #define _CAN_ENCODER_
 

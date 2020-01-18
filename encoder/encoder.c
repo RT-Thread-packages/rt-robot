@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2019-08-26     sogwms       The first version
+ * 2019-11-14     Soil_L       motified for the need of can encoder
  */
 
 #include <rtdevice.h>

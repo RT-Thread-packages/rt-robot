@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2019-07-17     Wu Han       The first version
+ * 2019-11-14     Soil_L       add four wheel omnidirectional
  */
 
 #ifndef __KINEMATICS_H__
