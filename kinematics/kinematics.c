@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2019-07-17     Wu Han       The first version
+ * 2019-11-14     Soil_L       add four wheel omnidirectional chassis
  */
 
 #include "kinematics.h"
@@ -46,7 +47,11 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     {
         new_kinematics->total_wheels = 4;
     }
-
+    if(k_base == FOUR_WD_ALLDIR)
+    {
+        new_kinematics->total_wheels = 4;
+    }
+    
     return new_kinematics;
 }
 
@@ -136,6 +141,13 @@ void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_in
         res_rpm[2] = cal_rpm.motor3;
         res_rpm[3] = cal_rpm.motor4;
     }
+    else if(kin.k_base == FOUR_WD_ALLDIR) //FRONT:0   BACK:1   LEFT:2   RIGHT:3
+    {
+        res_rpm[0] = x_rpm + tan_rpm;
+        res_rpm[1]  = -x_rpm + tan_rpm;
+        res_rpm[2]  = y_rpm + tan_rpm;
+        res_rpm[3] = -y_rpm + tan_rpm;
+    }
     else
     {
         return;
@@ -158,25 +170,43 @@ void kinematics_get_velocity(struct kinematics kin, struct rpm current_rpm, stru
     if(kin.k_base == FOUR_WD) total_wheels = 4;
     if(kin.k_base == ACKERMANN) total_wheels = 2;
     if(kin.k_base == MECANUM) total_wheels = 4;
+    if(kin.k_base == FOUR_WD_ALLDIR) total_wheels = 4;
 
     float average_rps_x;
     float average_rps_y;
     float average_rps_a;
 
-    //convert average revolutions per minute to revolutions per second
-    average_rps_x = ((float)(current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60; // RPM
-    res_vel.linear_x = average_rps_x * kin.wheel_cir; // m/s
-
-    //convert average revolutions per minute in y axis to revolutions per second
-    average_rps_y = ((float)(-current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 - current_rpm.motor4) / total_wheels) / 60; // RPM
-    if(kin.k_base == MECANUM)
-        res_vel.linear_y = average_rps_y * kin.wheel_cir; // m/s
-    else
-        res_vel.linear_y = 0;
-
-    //convert average revolutions per minute to revolutions per second
-    average_rps_a = ((float)(-current_rpm.motor1 + current_rpm.motor2 - current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60;
-    res_vel.angular_z =  (average_rps_a * kin.wheel_cir) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
-
+    if(kin.k_base == TWO_WD || kin.k_base == FOUR_WD ||  kin.k_base == ACKERMANN)
+    {
+      //convert average revolutions per minute to revolutions per second
+      average_rps_x = ((float)(current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60; // RPM
+      res_vel.linear_x = average_rps_x * kin.wheel_cir; // m/s
+      
+      //convert average revolutions per minute in y axis to revolutions per second
+      average_rps_y = ((float)(-current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 - current_rpm.motor4) / total_wheels) / 60; // RPM
+      if(kin.k_base == MECANUM)
+          res_vel.linear_y = average_rps_y * kin.wheel_cir; // m/s
+      else
+          res_vel.linear_y = 0;
+      
+      //convert average revolutions per minute to revolutions per second
+      average_rps_a = ((float)(-current_rpm.motor1 + current_rpm.motor2 - current_rpm.motor3 + current_rpm.motor4) / total_wheels) / 60;
+      res_vel.angular_z =  (average_rps_a * kin.wheel_cir) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
+    }
+    if(kin.k_base == FOUR_WD_ALLDIR)//FRONT:motor1  BACK:motor2  LEFT:motor3  RIGHT:motor4
+    {
+      //convert average revolutions per minute to revolutions per second
+      average_rps_x = ((float)(current_rpm.motor1 - current_rpm.motor2) / 2) / 60; // RPM
+      res_vel.linear_x = average_rps_x * kin.total_wheels; // m/s
+      
+      //convert average revolutions per minute in y axis to revolutions per second
+      average_rps_y = ((float)(current_rpm.motor3 - current_rpm.motor4) / 2) / 60; // RPM
+      res_vel.linear_y = average_rps_y * kin.wheel_cir; // m/s
+      
+      //convert average revolutions per minute to revolutions per second
+      average_rps_a = ((float)(current_rpm.motor1 + current_rpm.motor2 + current_rpm.motor3 + current_rpm.motor4 
+      							- 2*60*(average_rps_x+average_rps_y)) / total_wheels) / 60;
+      res_vel.angular_z =  (average_rps_a * kin.wheel_cir) / ((kin.length_x / 2) + (kin.length_y / 2)); //  rad/s
+    }
     rt_memcpy(velocity, &res_vel, sizeof(struct velocity));
 }

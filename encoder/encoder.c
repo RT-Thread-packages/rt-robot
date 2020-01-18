@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2019-08-26     sogwms       The first version
+ * 2019-11-14     Soil_L       motified for the need of can encoder
  */
 
 #include <rtdevice.h>
@@ -96,10 +97,16 @@ rt_int16_t encoder_measure_cps(encoder_t enc)
 rt_int16_t encoder_measure_rpm(encoder_t enc)
 {
     RT_ASSERT(enc != RT_NULL);
-    
-    // return resolution per minute
-    rt_int16_t res_rpm = encoder_measure_cps(enc) * 60 / enc->pulse_revol;
-
+    rt_int16_t res_rpm;
+    if(enc->sample_time == 0)
+    {
+    	res_rpm = enc->pulse_count;
+    }
+    else
+    {
+    	// return resolution per minute
+    	res_rpm = encoder_measure_cps(enc) * 60 / enc->pulse_revol;
+    }
     return res_rpm;
 }
 
