@@ -237,7 +237,7 @@ kinematics_t    kinematics_create(enum base k_base, float length_x, float length
 | k_base  | 类型 |
 | length_x | X轴两轮间距 |
 | length_y | Y轴两轮间距 |
-| wheel_radius | 车轮直径 |
+| wheel_radius | 车轮半径 |
 | **返回** | **--**             |
 |   |  |
 

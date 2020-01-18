@@ -1,5 +1,5 @@
-#ifndef _RT_ROBOT_CAN_ENCODER_
-#define _RT_ROBOT_CAN_ENCODER_
+#ifndef _CAN_ENCODER_
+#define _CAN_ENCODER_
 
 #include "encoder.h"
 

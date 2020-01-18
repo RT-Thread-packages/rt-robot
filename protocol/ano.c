@@ -106,17 +106,14 @@ static int _send_data(uint8_t *buffer, uint8_t length)
     return RT_ERROR;
 }
 
+#define _GET_PID_PARAM(buffer, offset)	(float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + offset) << 8) | *(buffer + (offset + 1))));
+
 static void _get_pid_param(uint8_t *buffer, float *kpid)
 {
-    kpid[0] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 4) << 8) | *(buffer + 5)));
-    kpid[1] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 6) << 8) | *(buffer + 7)));
-    kpid[2] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 8) << 8) | *(buffer + 9)));
-    kpid[3] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 10) << 8) | *(buffer + 11)));
-    kpid[4] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 12) << 8) | *(buffer + 13)));
-    kpid[5] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 14) << 8) | *(buffer + 15)));
-    kpid[6] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 16) << 8) | *(buffer + 17)));
-    kpid[7] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 18) << 8) | *(buffer + 19)));
-    kpid[8] = (float)((1/PID_PARAM_FACTOR) * ((int16_t)(*(buffer + 20) << 8) | *(buffer + 21)));
+    for(int i = 0; i < 9; i++)
+    {
+        kpid[i] = _GET_PID_PARAM(buffer, (i + 2) * 2); 
+    }
 }
 
 static void ano_send_check(uint8_t head, uint8_t check_sum)

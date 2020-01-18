@@ -45,7 +45,7 @@ struct kinematics
     enum base   k_base;
     float       length_x;
     float       length_y;
-    float       wheel_radius;
+    float       wheel_cir;
     int         total_wheels;
 };
 
