@@ -77,7 +77,7 @@ rt_err_t encoder_reset(encoder_t enc)
 rt_int16_t encoder_measure_cps(encoder_t enc)
 {
     RT_ASSERT(enc != RT_NULL);
-
+    
     // return count per second
     if((rt_tick_get() - enc->last_time) < rt_tick_from_millisecond(enc->sample_time))
     {

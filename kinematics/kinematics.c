@@ -30,7 +30,7 @@ kinematics_t kinematics_create(enum base k_base, float length_x, float length_y,
     new_kinematics->length_x     = length_x;
     new_kinematics->length_y     = length_y;
     new_kinematics->wheel_cir = wheel_radius * 2.0f * PI;;
-    
+
     if(k_base == TWO_WD)
     {
         new_kinematics->total_wheels = 2;
@@ -94,10 +94,10 @@ void kinematics_get_rpm(struct kinematics kin, struct velocity target_vel, rt_in
     //convert m/s to m/min
     linear_vel_x_mins = target_vel.linear_x * 60;
     linear_vel_y_mins = target_vel.linear_y * 60;
-    
+
     //convert rad/s to rad/min
     angular_vel_z_mins = target_vel.angular_z * 60;
-    
+
     tangential_vel = angular_vel_z_mins * ((kin.length_x / 2) + (kin.length_y / 2));
 
     x_rpm   = linear_vel_x_mins / kin.wheel_cir;
