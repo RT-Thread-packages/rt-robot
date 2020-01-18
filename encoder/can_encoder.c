@@ -30,9 +30,9 @@ static rt_err_t can_encoder_enable(void *enc)
     //Avoid repeated opening 
     if(!(enc_sub->can_dev->flag & RT_DEVICE_FLAG_ACTIVATED))
     {
-      res = rt_device_open(enc_sub->can_dev,RT_DEVICE_FLAG_INT_RX|RT_DEVICE_FLAG_INT_TX);
-      res = rt_device_control(enc_sub->can_dev,RT_CAN_CMD_SET_BAUD,(void *)enc_sub->Baud);
-      res = rt_device_control(enc_sub->can_dev,RT_CAN_CMD_SET_FILTER,&enc_sub->cfg);
+        res = rt_device_open(enc_sub->can_dev,RT_DEVICE_FLAG_INT_RX|RT_DEVICE_FLAG_INT_TX);
+        res = rt_device_control(enc_sub->can_dev,RT_CAN_CMD_SET_BAUD,(void *)enc_sub->Baud);
+        res = rt_device_control(enc_sub->can_dev,RT_CAN_CMD_SET_FILTER,&enc_sub->cfg);
     }
     res = rt_device_set_rx_indicate(enc_sub->can_dev,encoder_isr);
     
@@ -61,15 +61,15 @@ can_encoder_t can_encoder_create(char *can,struct rt_can_filter_config cfg,rt_ui
     can_encoder_t new_encoder = (can_encoder_t)encoder_create(sizeof(struct can_encoder),0);
     if(new_encoder == RT_NULL)
     {
-      return RT_NULL;
+        return RT_NULL;
     }
     
     new_encoder->can_dev = (rt_device_t)rt_device_find(can);
     if (new_encoder->can_dev == RT_NULL)
     {
-      rt_free(new_encoder);
-      LOG_E("Falied to find device on %s", can);
-      return RT_NULL;
+        rt_free(new_encoder);
+        LOG_E("Falied to find device on %s", can);
+        return RT_NULL;
     }
     
     new_encoder->cfg = cfg;

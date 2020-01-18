@@ -21,9 +21,9 @@ static rt_err_t can_motor_enable(void *mot)
     //Avoid repeated opening 
     if(!(mot_sub->can_dev->flag & RT_DEVICE_FLAG_ACTIVATED))
     {
-      rt_err_t res = rt_device_open(mot_sub->can_dev,RT_DEVICE_FLAG_INT_TX | RT_DEVICE_FLAG_INT_RX );
-      res = rt_device_control(mot_sub->can_dev,RT_CAN_CMD_SET_BAUD,(void *)mot_sub->Baud);
-      res = rt_device_control(mot_sub->can_dev,RT_CAN_CMD_SET_FILTER,&mot_sub->cfg);
+        rt_err_t res = rt_device_open(mot_sub->can_dev,RT_DEVICE_FLAG_INT_TX | RT_DEVICE_FLAG_INT_RX );
+        res = rt_device_control(mot_sub->can_dev,RT_CAN_CMD_SET_BAUD,(void *)mot_sub->Baud);
+        res = rt_device_control(mot_sub->can_dev,RT_CAN_CMD_SET_FILTER,&mot_sub->cfg);
     }
     return RT_EOK;
 }
@@ -48,11 +48,11 @@ static rt_err_t can_motor_set_speed(void *mot, rt_int16_t thousands)
     
     if(mot_sub->min_num > thousands)
     {
-      thousands = mot_sub->min_num;
+        thousands = mot_sub->min_num;
     }
     else if(mot_sub->max_num < thousands)
     {
-      thousands = mot_sub->max_num;
+        thousands = mot_sub->max_num;
     }
     
     mot_sub->msg->data[(mot_sub->mot_id -1)*2] = thousands>>8;
@@ -76,9 +76,9 @@ can_motor_t can_motor_create(char *can,struct rt_can_filter_config cfg,rt_uint32
     new_motor->can_dev = (rt_device_t)rt_device_find(can);
     if (new_motor->can_dev == RT_NULL)
     {
-      rt_free(new_motor);
-      LOG_E("Falied to find device on %s", can);
-      return RT_NULL;
+        rt_free(new_motor);
+        LOG_E("Falied to find device on %s", can);
+        return RT_NULL;
     }
     
     new_motor->cfg = cfg;

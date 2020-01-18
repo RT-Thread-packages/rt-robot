@@ -16,12 +16,12 @@ struct can_motor
 {
     struct motor                mot;
     rt_device_t                 can_dev;
-		struct rt_can_filter_config cfg;
-	  rt_uint32_t                 Baud;
-		rt_can_msg_t                msg;  //the pointer of message defined by the users,it decide the number of the can motor in the can net
-		rt_int16_t                  max_num;
-		rt_int16_t                  min_num;
-		rt_uint8_t                  mot_id;	//the id of the can motor in the can net
+    struct rt_can_filter_config cfg;
+    rt_uint32_t                 Baud;
+    rt_can_msg_t                msg;  //the pointer of message defined by the users,it decide the number of the can motor in the can net
+    rt_int16_t                  max_num;
+    rt_int16_t                  min_num;
+    rt_uint8_t                  mot_id;	//the id of the can motor in the can net
 };
 typedef struct can_motor *can_motor_t;
 
