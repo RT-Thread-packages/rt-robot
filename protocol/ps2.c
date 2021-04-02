@@ -122,7 +122,7 @@ int ps2_scan(ps2_ctrl_data_t pt)
     pt->left_stick_x = temp[7];
     pt->left_stick_y = temp[8];
 
-    if (temp[2] == 0x5A)
+    if (temp[2] == 0x5A && ((temp[1] == PS2_RED_MODE) || (temp[1] == PS2_GREEN_MODE)))
     {
         light_mode = temp[1];
         return 1;
@@ -177,50 +177,53 @@ static void ps2_thread_entry(void *param)
     while (1)
     {
         rt_thread_mdelay(THREAD_DELAY_TIME);   
-        ps2_scan(&ctrl_data);
-        // look-up table and send standard command
-        for (int i = 0; i < PS2_TABLE_SIZE; i++)
+        ctrl_data.button = 0xffff;   
+        if(ps2_scan(&ctrl_data))
         {
-            if (!(ctrl_data.button & table[i].ps2_cmd))
+            // look-up table and send standard command
+            for (int i = 0; i < PS2_TABLE_SIZE; i++)
             {
-                if (table[i].standard_cmd != COMMAND_NONE)
+                if (!(ctrl_data.button & table[i].ps2_cmd))
                 {
-                    command_handle(table[i].standard_cmd, RT_NULL, 0);
-                }
-            }
-        }
-
-        // rocker
-        if (ps2_read_light() == PS2_RED_MODE)
-        {
-            uint8_t value[4] = {
-                ctrl_data.left_stick_x, 
-                ctrl_data.right_stick_x,
-                ctrl_data.left_stick_y,
-                ctrl_data.right_stick_y};
-
-            rt_int16_t cmd[4] = {
-                table[PS2_ROCKER_LX].standard_cmd,
-                table[PS2_ROCKER_LY].standard_cmd,
-                table[PS2_ROCKER_RX].standard_cmd,
-                table[PS2_ROCKER_RY].standard_cmd};
-
-            for (int i = 0; i < 4; i++)
-            {
-                if (cmd[i] != COMMAND_NONE)
-                {
-                    float tmp = CHASSIS_VELOCITY_LINEAR_MAXIMUM;
-                    if (cmd[i] == COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z)
+                    if (table[i].standard_cmd != COMMAND_NONE)
                     {
-                        tmp = CHASSIS_VELOCITY_ANGULAR_MAXIMUM;
+                        command_handle(table[i].standard_cmd, RT_NULL, 0);
                     }
-                    
-                    target_velocity.data.common = tmp * ((0x80 - (int)(i/2)) - value[i]) / 128;
-                    command_handle(cmd[i], &target_velocity, sizeof(struct cmd_velocity));
                 }
             }
-        }
-    }
+
+            // rocker
+            if (ps2_read_light() == PS2_RED_MODE)
+            {
+                uint8_t value[4] = {
+                    ctrl_data.left_stick_x, 
+                    ctrl_data.right_stick_x,
+                    ctrl_data.left_stick_y,
+                    ctrl_data.right_stick_y};
+
+                rt_int16_t cmd[4] = {
+                    table[PS2_ROCKER_LX].standard_cmd,
+                    table[PS2_ROCKER_LY].standard_cmd,
+                    table[PS2_ROCKER_RX].standard_cmd,
+                    table[PS2_ROCKER_RY].standard_cmd};
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (cmd[i] != COMMAND_NONE)
+                    {
+                        float tmp = CHASSIS_VELOCITY_LINEAR_MAXIMUM;
+                        if (cmd[i] == COMMAND_SET_CHASSIS_VELOCITY_ANGULAR_Z)
+                        {
+                            tmp = CHASSIS_VELOCITY_ANGULAR_MAXIMUM;
+                        }
+                        
+                        target_velocity.data.common = tmp * ((0x80 - (int)(i/2)) - value[i]) / 128;
+                        command_handle(cmd[i], &target_velocity, sizeof(struct cmd_velocity));
+                    }
+                }
+            }
+		}
+	}
 }
 
 void ps2_init(rt_base_t cs_pin, rt_base_t clk_pin, rt_base_t do_pin, rt_base_t di_pin)
